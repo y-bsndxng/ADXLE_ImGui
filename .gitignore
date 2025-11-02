@@ -1,0 +1,99 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# debug information files
+*.dwo
+
+# Visual Studio
+*filters
+*vcxproj.user
+*vsidx
+*suo
+*ipch
+*log
+*tlog
+*idb
+*.vs/
+*Debug/
+*Release/
+*db
+
+# 設定ファイル
+*.ini
+
+# DS_Store
+.DS_Store
+
+# Xcode のビルド成果物
+build/
+DerivedData/
+
+# 一時ファイル
+*.log
+*.tmp
+
+# Xcode が生成するプロジェクト設定の一部
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
+
+# iOS / macOS シミュレータのデータ
+*.xcdevice
+
+# Swift Package Manager のビルドキャッシュ
+/.swiftpm
+/.build
+
+# CocoaPods
+Pods/
+*.xcworkspace
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Ruby / Bundler
+.bundle/
