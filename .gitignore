@@ -42,3 +42,20 @@
 
 # DS_Store
 .DS_Store
+
+# Visual Studio
+*filters
+*vcxproj.user
+*vsidx
+*suo
+*ipch
+*log
+*tlog
+*idb
+*.vs/
+*Debug/
+*Release/
+*db
+
+# ini
+*.ini
