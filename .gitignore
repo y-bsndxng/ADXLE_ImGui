@@ -97,3 +97,6 @@ fastlane/test_output
 
 # Ruby / Bundler
 .bundle/
+
+# cri
+/cri

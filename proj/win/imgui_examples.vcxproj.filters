@@ -4,6 +4,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{864ad466-a0fe-45bd-aa17-403f2d4b1956}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{93481d47-9990-4083-b82f-414166b3e099}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\external\imgui\imconfig.h">
@@ -23,6 +26,9 @@
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\adx_utils.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
