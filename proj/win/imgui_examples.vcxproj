@@ -17,6 +17,13 @@
     <ClCompile Include="..\..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\external\imgui_filedialog\ImGuiFileDialog.cpp">
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\adx_utils.cpp" />
+    <ClCompile Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.cpp" />
+    <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp" />
     <ClCompile Include="..\..\src\win\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -26,10 +33,19 @@
     <ClInclude Include="..\..\external\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\external\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
-    <ClInclude Include="..\..\src\common\adx_utils.h" />
+    <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialog.h" />
+    <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="..\..\src\common\adx\adx_utils.h" />
+    <ClInclude Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.h" />
+    <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\external\imgui\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\external\imgui_filedialog\Documentation.md" />
+    <None Include="..\..\external\imgui_filedialog\LICENSE" />
+    <None Include="..\..\external\imgui_filedialog\README.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{b4cf9797-519d-4afe-a8f4-5141a6b521d3}</ProjectGuid>
@@ -74,7 +90,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;..\..\cri\pc\include;..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;..\..\backends;..\..\cri\pc\include;..\..\src\common\adx;..\..\src\common\imgui_utils;..\..\external\imgui_filedialog;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -96,7 +112,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;..\..\cri\pc\include;..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;..\..\backends;..\..\cri\pc\include;..\..\src\common\adx;..\..\src\common\imgui_utils;..\..\external\imgui_filedialog;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
