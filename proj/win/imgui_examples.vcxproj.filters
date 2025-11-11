@@ -7,6 +7,15 @@
     <Filter Include="common">
       <UniqueIdentifier>{93481d47-9990-4083-b82f-414166b3e099}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common\adx">
+      <UniqueIdentifier>{a47f0da9-2ce3-4d02-a615-5b104d85ce47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\imgui_utils">
+      <UniqueIdentifier>{68ce57e0-148a-4d94-9f04-a3bb70bb6be2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui_filedialog">
+      <UniqueIdentifier>{d0cff6bb-e1c0-417b-b053-aa8a2a58df7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\external\imgui\imconfig.h">
@@ -27,8 +36,20 @@
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\adx_utils.h">
-      <Filter>common</Filter>
+    <ClInclude Include="..\..\src\common\adx\adx_utils.h">
+      <Filter>common\adx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.h">
+      <Filter>common\imgui_utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.h">
+      <Filter>common\imgui_utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialog.h">
+      <Filter>imgui_filedialog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialogConfig.h">
+      <Filter>imgui_filedialog</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -51,10 +72,33 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\win\main.cpp" />
+    <ClCompile Include="..\..\src\common\adx\adx_utils.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp">
+      <Filter>common\imgui_utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.cpp">
+      <Filter>common\imgui_utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui_filedialog\ImGuiFileDialog.cpp">
+      <Filter>imgui_filedialog</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\external\imgui\LICENSE.txt">
       <Filter>imgui</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\external\imgui_filedialog\Documentation.md">
+      <Filter>imgui_filedialog</Filter>
+    </None>
+    <None Include="..\..\external\imgui_filedialog\LICENSE">
+      <Filter>imgui_filedialog</Filter>
+    </None>
+    <None Include="..\..\external\imgui_filedialog\README.md">
+      <Filter>imgui_filedialog</Filter>
+    </None>
   </ItemGroup>
 </Project>
