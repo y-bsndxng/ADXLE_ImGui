@@ -1,6 +1,6 @@
 #include <imgui_utils.h>
 
-inline bool imgui_comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
+bool imgui_comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
 {
 	bool changed = false;
 
