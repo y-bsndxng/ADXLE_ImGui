@@ -1,5 +1,19 @@
 #pragma once
 
+/* STD */
+#include <cstdint>
+#include <string>
+#include <array>
+#include <vector>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+#include <map>
+#include <unordered_map>
+#include <math.h>
+#include <filesystem>
+
+/* CRI Headers */
 #include <cri_adx2le.h>
 #include <cri_le_atom.h>
 #include <cri_le_atom_asr.h>

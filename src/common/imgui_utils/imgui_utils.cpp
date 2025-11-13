@@ -34,7 +34,7 @@ inline void imgui_textrightalign(const char* text)
 	ImGui::Text("%s", text);
 }
 
-inline void imgui_open_dialog(const char* dialog_name, char* select_file_name)
+void imgui_open_dialog(const char* dialog_name, char* select_file_name)
 {
 	if (ImGuiFileDialog::Instance()->Display(dialog_name)) {
 		if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
