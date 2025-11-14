@@ -1,15 +1,16 @@
-#include <imgui_adx_initilaize.h>
+#include <imgui_adx.h>
 #include <imgui_utils.h>
 #include <adx_utils.h>
+#include <adx_runtime.h>
 
-void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos)
+void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 {
 	constexpr int32_t path_length = 512;
 	static char acf_file[path_length] = "";
 	static char acb_file[path_length] = "";
 	static char awb_file[path_length] = "";
 	static const std::vector<CriAtomExThreadModel> thread_models{ CRIATOMEX_THREAD_MODEL_MULTI_WITH_SONICSYNC, CRIATOMEX_THREAD_MODEL_MULTI, CRIATOMEX_THREAD_MODEL_MULTI_USER_DRIVEN, CRIATOMEX_THREAD_MODEL_USER_MULTI, CRIATOMEX_THREAD_MODEL_SINGLE };
-	static const std::vector<std::string> thread_models_items{ "MULTI_WITH_SONICSYNC", "MULTI", "USER_DRIVEN", "USER_MULTI", "SINGLE"};
+	static const std::vector<std::string> thread_models_items{ "MULTI_WITH_SONICSYNC", "MULTI", "USER_DRIVEN", "USER_MULTI", "SINGLE" };
 	static int32_t selected_thread_model_index = 0;
 	static int32_t num_sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
 	static int32_t num_voice = 64;
@@ -31,7 +32,7 @@ void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos)
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseACFFileDlgKey", "Choose File", ".acf", config);
 	}
-	imgui_open_dialog("ChooseACFFileDlgKey", acf_file);
+	ImGuiUtils::OpenDialog("ChooseACFFileDlgKey", acf_file);
 	ImGui::SameLine();
 	if (ImGui::Button("Clear##ACF")) {
 		memset(&acf_file, 0, sizeof(acf_file));
@@ -45,7 +46,7 @@ void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos)
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseACBFileDlgKey", "Choose File", ".acb", config);
 	}
-	imgui_open_dialog("ChooseACBFileDlgKey", acb_file);
+	ImGuiUtils::OpenDialog("ChooseACBFileDlgKey", acb_file);
 	ImGui::SameLine();
 	if (ImGui::Button("Clear##ACB")) {
 		memset(&acb_file, 0, sizeof(acb_file));
@@ -59,7 +60,7 @@ void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos)
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseAWBFileDlgKey", "Choose File", ".awb", config);
 	}
-	imgui_open_dialog("ChooseAWBFileDlgKey", awb_file);
+	ImGuiUtils::OpenDialog("ChooseAWBFileDlgKey", awb_file);
 	ImGui::SameLine();
 	if (ImGui::Button("Clear##AWB")) {
 		memset(&awb_file, 0, sizeof(awb_file));
@@ -67,7 +68,7 @@ void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos)
 
 	ImGui::Separator();
 	ui_caption = "ThreadModel";
-	imgui_comboui(&ui_caption, &selected_thread_model_index, &thread_models_items);
+	ImGuiUtils::Comboui(&ui_caption, &selected_thread_model_index, &thread_models_items);
 	ImGui::SliderInt("Number of Sampling Rate", &num_sampling_rate, 0, 192000);
 	ImGui::SliderInt("Number of Voice", &num_voice, 1, 256);
 	ImGui::SliderInt("Number of Virtual Voice", &num_virtual_voice, 1, 256);
@@ -92,9 +93,9 @@ void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos)
 		criAtomExAsr_SetDefaultConfig(&asr_config);
 
 		/* エラーコールバック関数の登録 */
-		criErr_SetCallback(user_error_callback_func);
+		criErr_SetCallback(ADXUtils::user_error_callback_func);
 		/* メモリアロケータの登録 */
-		criAtomEx_SetUserAllocator(user_alloc_func, user_free_func, NULL);
+		criAtomEx_SetUserAllocator(ADXUtils::user_alloc_func, ADXUtils::user_free_func, NULL);
 
 		/* ACF情報の設定 */
 		acf_info.type = CRIATOMEX_ACF_LOCATION_INFO_TYPE_NAME;

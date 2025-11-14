@@ -21,8 +21,9 @@
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\adx_runtime.cpp" />
     <ClCompile Include="..\..\src\common\adx\adx_utils.cpp" />
-    <ClCompile Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.cpp" />
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_initilaize.cpp" />
     <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp" />
     <ClCompile Include="..\..\src\win\main.cpp" />
   </ItemGroup>
@@ -35,8 +36,9 @@
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
     <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialog.h" />
     <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="..\..\src\common\adx\adx_runtime.h" />
     <ClInclude Include="..\..\src\common\adx\adx_utils.h" />
-    <ClInclude Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.h" />
+    <ClInclude Include="..\..\src\common\adx\imgui_adx.h" />
     <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 #include <adx_utils.h>
 
-void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray)
+void ADXUtils::user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray)
 {
 	const CriChar8* errmsg;
 
@@ -13,7 +13,7 @@ void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2,
 	return;
 }
 
-void* user_alloc_func(void* obj, CriUint32 size)
+void* ADXUtils::user_alloc_func(void* obj, CriUint32 size)
 {
 	void* ptr;
 	UNUSED(obj);
@@ -21,7 +21,7 @@ void* user_alloc_func(void* obj, CriUint32 size)
 	return ptr;
 }
 
-void user_free_func(void* obj, void* ptr)
+void ADXUtils::user_free_func(void* obj, void* ptr)
 {
 	UNUSED(obj);
 	free(ptr);

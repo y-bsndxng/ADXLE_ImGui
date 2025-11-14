@@ -4,4 +4,6 @@
 #include <ImGuiFileDialog.h>
 #include <imgui_utils.h>
 
-void imgui_adx_initilaize(const ImVec2 size, const ImVec2 pos);
+namespace ImGuiAdx {
+	void Initilaize(const ImVec2 size, const ImVec2 pos);
+};
