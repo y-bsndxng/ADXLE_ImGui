@@ -1,6 +1,6 @@
 #include <imgui_utils.h>
 
-inline bool imgui_comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
+bool ImGuiUtils::Comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
 {
 	bool changed = false;
 
@@ -23,7 +23,7 @@ inline bool imgui_comboui(const std::string* caption, int32_t* current_item_inde
 	return changed;
 }
 
-inline void imgui_textrightalign(const char* text)
+void ImGuiUtils::Rightalign(const char* text)
 {
 	float textWidth = ImGui::CalcTextSize(text).x;
 	float availableWidth = ImGui::GetContentRegionAvail().x;
@@ -34,7 +34,7 @@ inline void imgui_textrightalign(const char* text)
 	ImGui::Text("%s", text);
 }
 
-inline void imgui_open_dialog(const char* dialog_name, char* select_file_name)
+void ImGuiUtils::OpenDialog(const char* dialog_name, char* select_file_name)
 {
 	if (ImGuiFileDialog::Instance()->Display(dialog_name)) {
 		if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK

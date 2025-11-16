@@ -42,14 +42,17 @@
     <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.h">
       <Filter>common\imgui_utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.h">
-      <Filter>common\imgui_utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialog.h">
       <Filter>imgui_filedialog</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialogConfig.h">
       <Filter>imgui_filedialog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\adx\imgui_adx.h">
+      <Filter>common\adx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\adx\adx_runtime.h">
+      <Filter>common\adx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -78,11 +81,14 @@
     <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp">
       <Filter>common\imgui_utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\imgui_utils\imgui_adx_initilaize.cpp">
-      <Filter>common\imgui_utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\external\imgui_filedialog\ImGuiFileDialog.cpp">
       <Filter>imgui_filedialog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_initilaize.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\adx_runtime.cpp">
+      <Filter>common\adx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

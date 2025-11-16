@@ -12,7 +12,7 @@
 #include <d3d12.h>
 #include <dxgi1_5.h>
 #include <tchar.h>
-#include <imgui_adx_initilaize.h>
+#include <imgui_adx.h>
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
 #endif
@@ -215,7 +215,7 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         
-        imgui_adx_initilaize(ImVec2{ 800, 500 }, ImVec2{ 100, 100 });
+        ImGuiAdx::Initilaize(ImVec2{ 800, 500 }, ImVec2{ 100, 100 });
 
         for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) {
             struct funcs { static bool IsLegacyNativeDupe(ImGuiKey) { return false; } };
