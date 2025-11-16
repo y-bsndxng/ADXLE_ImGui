@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cstdlib>
 /* CRI Headers */
 #include <cri_adx2le.h>
 

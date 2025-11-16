@@ -77,7 +77,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	if (ImGui::Button("Initialize")) {
 #if defined(XPT_TGT_PC) 
 		CriAtomExConfig_WASAPI config;
-#elif (XPT_TGT_MACOSX)
+#elif defined(XPT_TGT_MACOSX)
 		CriAtomExConfig_MACOSX config;
 #endif
 		CriAtomExConfig ex_config;
@@ -86,7 +86,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 
 #if defined(XPT_TGT_PC) 
 		criAtomEx_SetDefaultConfig_WASAPI(&config);
-#elif (XPT_TGT_MACOSX)
+#elif defined(XPT_TGT_MACOSX)
 		criAtomEx_SetDefaultConfig_MACOSX(&config);
 #endif
 		criAtomEx_SetDefaultConfig(&ex_config);

@@ -8,6 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		05318E0F274C397200A8DE2E /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05318E0E274C397200A8DE2E /* GameController.framework */; };
+		1399704A2EC9A47200B35EC9 /* ImGuiFileDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970482EC9A47200B35EC9 /* ImGuiFileDialog.cpp */; };
+		1399704B2EC9A47200B35EC9 /* ImGuiFileDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970482EC9A47200B35EC9 /* ImGuiFileDialog.cpp */; };
+		139970542EC9A7A200B35EC9 /* adx_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970522EC9A7A200B35EC9 /* adx_utils.cpp */; };
+		139970552EC9A7A200B35EC9 /* adx_runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970512EC9A7A200B35EC9 /* adx_runtime.cpp */; };
+		139970562EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */; };
+		139970572EC9A7A200B35EC9 /* adx_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970522EC9A7A200B35EC9 /* adx_utils.cpp */; };
+		139970582EC9A7A200B35EC9 /* adx_runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970512EC9A7A200B35EC9 /* adx_runtime.cpp */; };
+		139970592EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */; };
+		1399705C2EC9A7BA00B35EC9 /* imgui_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1399705B2EC9A7BA00B35EC9 /* imgui_utils.cpp */; };
+		1399705D2EC9A7BA00B35EC9 /* imgui_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1399705B2EC9A7BA00B35EC9 /* imgui_utils.cpp */; };
+		139970662EC9AF0800B35EC9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 139970652EC9AF0800B35EC9 /* AudioToolbox.framework */; };
+		139970672EC9AF1700B35EC9 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 139970612EC9AEDE00B35EC9 /* AVFAudio.framework */; };
+		139970692EC9AF2A00B35EC9 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 139970682EC9AF2A00B35EC9 /* CoreAudio.framework */; };
 		13E328352EC0C54D00B703A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13E328342EC0C54D00B703A0 /* imgui.cpp */; };
 		13E328362EC0C54D00B703A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13E328342EC0C54D00B703A0 /* imgui.cpp */; };
 		13E3283B2EC0C5A000B703A0 /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13E328392EC0C5A000B703A0 /* imgui_tables.cpp */; };
@@ -36,6 +49,17 @@
 
 /* Begin PBXFileReference section */
 		05318E0E274C397200A8DE2E /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
+		139970472EC9A47200B35EC9 /* ImGuiFileDialog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ImGuiFileDialog.h; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui_filedialog/ImGuiFileDialog.h; sourceTree = "<absolute>"; };
+		139970482EC9A47200B35EC9 /* ImGuiFileDialog.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiFileDialog.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui_filedialog/ImGuiFileDialog.cpp; sourceTree = "<absolute>"; };
+		139970492EC9A47200B35EC9 /* ImGuiFileDialogConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ImGuiFileDialogConfig.h; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui_filedialog/ImGuiFileDialogConfig.h; sourceTree = "<absolute>"; };
+		139970512EC9A7A200B35EC9 /* adx_runtime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = adx_runtime.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/src/common/adx/adx_runtime.cpp; sourceTree = "<absolute>"; };
+		139970522EC9A7A200B35EC9 /* adx_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = adx_utils.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/src/common/adx/adx_utils.cpp; sourceTree = "<absolute>"; };
+		139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_adx_initilaize.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/src/common/adx/imgui_adx_initilaize.cpp; sourceTree = "<absolute>"; };
+		1399705B2EC9A7BA00B35EC9 /* imgui_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_utils.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/src/common/imgui_utils/imgui_utils.cpp; sourceTree = "<absolute>"; };
+		139970612EC9AEDE00B35EC9 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
+		139970632EC9AEF500B35EC9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		139970652EC9AF0800B35EC9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		139970682EC9AF2A00B35EC9 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		13E328332EC0C54D00B703A0 /* imgui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui/imgui.h; sourceTree = "<absolute>"; };
 		13E328342EC0C54D00B703A0 /* imgui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui/imgui.cpp; sourceTree = "<absolute>"; };
 		13E328372EC0C55C00B703A0 /* imconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui/imconfig.h; sourceTree = "<absolute>"; };
@@ -78,6 +102,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				139970692EC9AF2A00B35EC9 /* CoreAudio.framework in Frameworks */,
+				139970672EC9AF1700B35EC9 /* AVFAudio.framework in Frameworks */,
+				139970662EC9AF0800B35EC9 /* AudioToolbox.framework in Frameworks */,
 				8309BDC6253CCCFE0045E2A1 /* AppKit.framework in Frameworks */,
 				83BBE9EC20EB471700295997 /* MetalKit.framework in Frameworks */,
 				05318E0F274C397200A8DE2E /* GameController.framework in Frameworks */,
@@ -88,9 +115,48 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		139970462EC9A44A00B35EC9 /* imgui_filedialog */ = {
+			isa = PBXGroup;
+			children = (
+				139970472EC9A47200B35EC9 /* ImGuiFileDialog.h */,
+				139970482EC9A47200B35EC9 /* ImGuiFileDialog.cpp */,
+				139970492EC9A47200B35EC9 /* ImGuiFileDialogConfig.h */,
+			);
+			path = imgui_filedialog;
+			sourceTree = "<group>";
+		};
+		1399704F2EC9A76300B35EC9 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				1399705A2EC9A7A600B35EC9 /* imgui_utils */,
+				139970502EC9A78A00B35EC9 /* adx */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		139970502EC9A78A00B35EC9 /* adx */ = {
+			isa = PBXGroup;
+			children = (
+				139970512EC9A7A200B35EC9 /* adx_runtime.cpp */,
+				139970522EC9A7A200B35EC9 /* adx_utils.cpp */,
+				139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */,
+			);
+			path = adx;
+			sourceTree = "<group>";
+		};
+		1399705A2EC9A7A600B35EC9 /* imgui_utils */ = {
+			isa = PBXGroup;
+			children = (
+				1399705B2EC9A7BA00B35EC9 /* imgui_utils.cpp */,
+			);
+			path = imgui_utils;
+			sourceTree = "<group>";
+		};
 		8307E7B520E9F9C700473790 = {
 			isa = PBXGroup;
 			children = (
+				1399704F2EC9A76300B35EC9 /* common */,
+				139970462EC9A44A00B35EC9 /* imgui_filedialog */,
 				83BBE9F020EB544400295997 /* imgui */,
 				8309BD9E253CCBA70045E2A1 /* example */,
 				8307E7C520E9F9C900473790 /* Products */,
@@ -138,6 +204,10 @@
 		83BBE9E320EB46B800295997 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				139970682EC9AF2A00B35EC9 /* CoreAudio.framework */,
+				139970652EC9AF0800B35EC9 /* AudioToolbox.framework */,
+				139970632EC9AEF500B35EC9 /* AVFoundation.framework */,
+				139970612EC9AEDE00B35EC9 /* AVFAudio.framework */,
 				05318E0E274C397200A8DE2E /* GameController.framework */,
 				8309BDC5253CCCFE0045E2A1 /* AppKit.framework */,
 				8309BD8E253CCAAA0045E2A1 /* UIKit.framework */,
@@ -270,12 +340,17 @@
 			files = (
 				13E328352EC0C54D00B703A0 /* imgui.cpp in Sources */,
 				13E328492EC0C5E200B703A0 /* imgui_impl_osx.mm in Sources */,
+				1399705D2EC9A7BA00B35EC9 /* imgui_utils.cpp in Sources */,
 				13E328472EC0C5D600B703A0 /* imgui_impl_metal.mm in Sources */,
 				13E328412EC0C5B800B703A0 /* imgui_draw.cpp in Sources */,
 				13E3284D2EC0C63E00B703A0 /* main.mm in Sources */,
 				13E328422EC0C5B800B703A0 /* imgui_demo.cpp in Sources */,
 				13E3283B2EC0C5A000B703A0 /* imgui_tables.cpp in Sources */,
 				13E3283C2EC0C5A000B703A0 /* imgui_widgets.cpp in Sources */,
+				139970542EC9A7A200B35EC9 /* adx_utils.cpp in Sources */,
+				139970552EC9A7A200B35EC9 /* adx_runtime.cpp in Sources */,
+				139970562EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp in Sources */,
+				1399704A2EC9A47200B35EC9 /* ImGuiFileDialog.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,12 +360,17 @@
 			files = (
 				13E328362EC0C54D00B703A0 /* imgui.cpp in Sources */,
 				13E3284A2EC0C5E200B703A0 /* imgui_impl_osx.mm in Sources */,
+				1399705C2EC9A7BA00B35EC9 /* imgui_utils.cpp in Sources */,
 				13E328462EC0C5D600B703A0 /* imgui_impl_metal.mm in Sources */,
 				13E328432EC0C5B800B703A0 /* imgui_draw.cpp in Sources */,
 				13E3284C2EC0C63E00B703A0 /* main.mm in Sources */,
 				13E328442EC0C5B800B703A0 /* imgui_demo.cpp in Sources */,
 				13E3283D2EC0C5A000B703A0 /* imgui_tables.cpp in Sources */,
 				13E3283E2EC0C5A000B703A0 /* imgui_widgets.cpp in Sources */,
+				139970572EC9A7A200B35EC9 /* adx_utils.cpp in Sources */,
+				139970582EC9A7A200B35EC9 /* adx_runtime.cpp in Sources */,
+				139970592EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp in Sources */,
+				1399704B2EC9A47200B35EC9 /* ImGuiFileDialog.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,6 +432,15 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../external/imgui",
+					"$(SRCROOT)/../../external/imgui/backends",
+					"$(SRCROOT)/../../external/imgui_filedialog",
+					"$(SRCROOT)/../../src/common/imgui_utils",
+					"$(SRCROOT)/../../src/common/adx",
+					"$(SRCROOT)/../../cri/macosx/include",
+				);
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -403,6 +492,15 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../external/imgui",
+					"$(SRCROOT)/../../external/imgui/backends",
+					"$(SRCROOT)/../../external/imgui_filedialog",
+					"$(SRCROOT)/../../src/common/imgui_utils",
+					"$(SRCROOT)/../../src/common/adx",
+					"$(SRCROOT)/../../cri/macosx/include",
+				);
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
@@ -418,14 +516,20 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-ios";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../external/imgui",
 					"$(SRCROOT)/../../external/imgui/backends",
+					"$(SRCROOT)/../../external/imgui_filedialog",
+					"$(SRCROOT)/../../src/common/imgui_utils",
+					"$(SRCROOT)/../../src/common/adx",
 				);
+				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -441,14 +545,20 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-ios";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../external/imgui",
 					"$(SRCROOT)/../../external/imgui/backends",
+					"$(SRCROOT)/../../external/imgui_filedialog",
+					"$(SRCROOT)/../../src/common/imgui_utils",
+					"$(SRCROOT)/../../src/common/adx",
 				);
+				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -466,7 +576,9 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../cri/macosx/libs";
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				OTHER_LDFLAGS = "-lcri_ware_macosx_LE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-macos";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = macosx;
@@ -487,7 +599,9 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../cri/macosx/libs";
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				OTHER_LDFLAGS = "-lcri_ware_macosx_LE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-macos";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = macosx;
