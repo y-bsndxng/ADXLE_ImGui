@@ -215,7 +215,9 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         
-        ImGuiAdx::Initilaize(ImVec2{ 800, 500 }, ImVec2{ 100, 100 });
+        if (!ImGuiAdx::IsInitilaized()) {
+            ImGuiAdx::Initilaize(ImVec2{ 800, 500 }, ImVec2{ 100, 100 });
+        }
 
         for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) {
             struct funcs { static bool IsLegacyNativeDupe(ImGuiKey) { return false; } };
@@ -223,7 +225,7 @@ int main(int, char**)
                 continue;
             }
             if (strcmp(ImGui::GetKeyName(key), "Escape") == 0) {
-                done = true;
+                ImGuiAdx::Finalize();
             }
         }
 

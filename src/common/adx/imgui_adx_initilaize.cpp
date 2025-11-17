@@ -80,8 +80,6 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 #elif defined(XPT_TGT_MACOSX)
 		CriAtomExConfig_MACOSX config;
 #endif
-		CriAtomExConfig ex_config;
-		CriAtomExAsrConfig asr_config;
 		CriAtomExAcfRegistrationInfo acf_info;
 
 #if defined(XPT_TGT_PC) 
@@ -89,8 +87,6 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 #elif defined(XPT_TGT_MACOSX)
 		criAtomEx_SetDefaultConfig_MACOSX(&config);
 #endif
-		criAtomEx_SetDefaultConfig(&ex_config);
-		criAtomExAsr_SetDefaultConfig(&asr_config);
 
 		/* エラーコールバック関数の登録 */
 		criErr_SetCallback(ADXUtils::user_error_callback_func);
@@ -105,6 +101,8 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		/* ACF ファイル名が空ならファイルなし初期化 */
 		if (strlen(acf_file) == 0) {
 			config.atom_ex.acf_info = NULL;
+		} else {
+			config.atom_ex.acf_info = &acf_info;
 		}
 		config.asr.output_sampling_rate = num_sampling_rate;
 		config.hca_mx.max_sampling_rate = num_sampling_rate;
@@ -112,12 +110,13 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		config.atom_ex.thread_model = thread_models[selected_thread_model_index];
 
 		/* デフォルト値の上書き */
-#if defined (XPT_TGT_PC)
-		criAtomEx_Initialize_WASAPI(&config, NULL, 0);
-#elif defined(XPT_TGT_MACOSX)
-		criAtomEx_Initialize_MACOSX(&config, NULL, 0);
-#endif
+		ADXRuntime::Initialize(&config);
 	}
 
 	ImGui::End();
+}
+
+bool ImGuiAdx::IsInitilaized(void)
+{
+	return ADXRuntime::IsInitilaized();
 }

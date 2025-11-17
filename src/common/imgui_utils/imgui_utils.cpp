@@ -25,11 +25,11 @@ bool ImGuiUtils::Comboui(const std::string* caption, int32_t* current_item_index
 
 void ImGuiUtils::Rightalign(const char* text)
 {
-	float textWidth = ImGui::CalcTextSize(text).x;
-	float availableWidth = ImGui::GetContentRegionAvail().x;
-	if (availableWidth > textWidth)
+	float text_width = ImGui::CalcTextSize(text).x;
+	float available_width = ImGui::GetContentRegionAvail().x;
+	if (available_width > text_width)
 	{
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + availableWidth - textWidth);
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + available_width - text_width);
 	}
 	ImGui::Text("%s", text);
 }
