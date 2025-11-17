@@ -1,5 +1,4 @@
 #include <imgui_adx.h>
-#include <imgui_utils.h>
 #include <adx_utils.h>
 #include <adx_runtime.h>
 

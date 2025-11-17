@@ -25,7 +25,7 @@
     <ClCompile Include="..\..\src\common\adx\adx_utils.cpp" />
     <ClCompile Include="..\..\src\common\adx\imgui_adx_finalize.cpp" />
     <ClCompile Include="..\..\src\common\adx\imgui_adx_initilaize.cpp" />
-    <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp" />
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_update.cpp" />
     <ClCompile Include="..\..\src\win\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -40,7 +40,7 @@
     <ClInclude Include="..\..\src\common\adx\adx_runtime.h" />
     <ClInclude Include="..\..\src\common\adx\adx_utils.h" />
     <ClInclude Include="..\..\src\common\adx\imgui_adx.h" />
-    <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.h" />
+    <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\external\imgui\LICENSE.txt" />

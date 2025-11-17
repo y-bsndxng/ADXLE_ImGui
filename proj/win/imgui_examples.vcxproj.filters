@@ -39,9 +39,6 @@
     <ClInclude Include="..\..\src\common\adx\adx_utils.h">
       <Filter>common\adx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.h">
-      <Filter>common\imgui_utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\external\imgui_filedialog\ImGuiFileDialog.h">
       <Filter>imgui_filedialog</Filter>
     </ClInclude>
@@ -53,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\common\adx\adx_runtime.h">
       <Filter>common\adx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\imgui_utils\imgui_utils.hpp">
+      <Filter>common\imgui_utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -78,9 +78,6 @@
     <ClCompile Include="..\..\src\common\adx\adx_utils.cpp">
       <Filter>common\adx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp">
-      <Filter>common\imgui_utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\external\imgui_filedialog\ImGuiFileDialog.cpp">
       <Filter>imgui_filedialog</Filter>
     </ClCompile>
@@ -91,6 +88,9 @@
       <Filter>common\adx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\adx\imgui_adx_finalize.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_update.cpp">
       <Filter>common\adx</Filter>
     </ClCompile>
   </ItemGroup>
