@@ -1,6 +1,21 @@
-#include <imgui_utils.h>
+#pragma once
 
-bool ImGuiUtils::Comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <imgui.h>
+#include <ImGuiFileDialog.h>
+
+namespace ImGuiUtils {
+	inline bool Comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items);
+	inline void Rightalign(const char* text);
+	inline void OpenDialog(const char* dialog_name, char* select_file_name);
+	inline ImVec2 AddOffsetX(const ImVec2& v, float offset);
+	inline ImVec2 AddOffsetY(const ImVec2& v, float offset);
+	inline ImVec2 AddOffset(const ImVec2& v, float offset);
+}
+
+inline bool ImGuiUtils::Comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
 {
 	bool changed = false;
 
@@ -23,7 +38,7 @@ bool ImGuiUtils::Comboui(const std::string* caption, int32_t* current_item_index
 	return changed;
 }
 
-void ImGuiUtils::Rightalign(const char* text)
+inline void ImGuiUtils::Rightalign(const char* text)
 {
 	float text_width = ImGui::CalcTextSize(text).x;
 	float available_width = ImGui::GetContentRegionAvail().x;
@@ -34,7 +49,7 @@ void ImGuiUtils::Rightalign(const char* text)
 	ImGui::Text("%s", text);
 }
 
-void ImGuiUtils::OpenDialog(const char* dialog_name, char* select_file_name)
+inline void ImGuiUtils::OpenDialog(const char* dialog_name, char* select_file_name)
 {
 	if (ImGuiFileDialog::Instance()->Display(dialog_name)) {
 		if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
@@ -45,4 +60,19 @@ void ImGuiUtils::OpenDialog(const char* dialog_name, char* select_file_name)
 		/* キャンセル時は何もせず終了 */
 		ImGuiFileDialog::Instance()->Close();
 	}
+}
+
+inline ImVec2 ImGuiUtils::AddOffsetX(const ImVec2& v, float offset)
+{
+	return ImVec2{ v.x + offset, v.y };
+}
+
+inline ImVec2 ImGuiUtils::AddOffsetY(const ImVec2& v, float offset)
+{
+	return ImVec2{ v.x, v.y + offset };
+}
+
+inline ImVec2 ImGuiUtils::AddOffset(const ImVec2& v, float offset)
+{
+	return ImVec2{ ImGuiUtils::AddOffsetX(v, offset).x, ImGuiUtils::AddOffsetY(v, offset).y };
 }

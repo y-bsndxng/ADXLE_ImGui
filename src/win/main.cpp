@@ -216,7 +216,13 @@ int main(int, char**)
         ImGui::NewFrame();
         
         if (!ImGuiAdx::IsInitilaized()) {
-            ImGuiAdx::Initilaize(ImVec2{ 800, 500 }, ImVec2{ 100, 100 });
+            ImVec2 size{ 800, 500 };
+            ImVec2 pos{ 100, 100 };
+            ImGuiAdx::Initilaize(size, pos);
+        } else {
+            ImVec2 size{ 200, 500 };
+            ImVec2 pos{ 100, 100 };
+            ImGuiAdx::Update(size, pos);
         }
 
         for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) {
