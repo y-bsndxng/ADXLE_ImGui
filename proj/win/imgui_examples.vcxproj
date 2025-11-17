@@ -23,6 +23,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\adx\adx_runtime.cpp" />
     <ClCompile Include="..\..\src\common\adx\adx_utils.cpp" />
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_finalize.cpp" />
     <ClCompile Include="..\..\src\common\adx\imgui_adx_initilaize.cpp" />
     <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp" />
     <ClCompile Include="..\..\src\win\main.cpp" />

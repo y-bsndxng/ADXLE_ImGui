@@ -6,4 +6,6 @@
 
 namespace ImGuiAdx {
 	void Initilaize(const ImVec2 size, const ImVec2 pos);
+	bool IsInitilaized(void);
+	void Finalize(void);
 };

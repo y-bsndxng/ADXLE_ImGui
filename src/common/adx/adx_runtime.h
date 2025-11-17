@@ -25,8 +25,10 @@
 
 namespace ADXRuntime {
 #if defined(XPT_TGT_PC)
-	bool Initialize(CriAtomExConfig_WASAPI& config);
+	void Initialize(CriAtomExConfig_WASAPI* config);
 #elif defined(XPT_TGT_MACOSX)
-	bool Initialize(CriAtomExConfig_MACOSX& config);
+	void Initialize(CriAtomExConfig_MACOSX* config);
 #endif
+	bool IsInitilaized(void);
+	void Finalize(void);
 }
