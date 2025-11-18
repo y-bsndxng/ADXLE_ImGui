@@ -9,7 +9,7 @@ void ADXRuntime::Initialize(CriAtomExConfig_WASAPI* config)
 #elif defined(XPT_TGT_MACOSX)
 void ADXRuntime::Initialize(CriAtomExConfig_MACOSX* config) 
 {
-	criAtomEx_Initialize_MACOSX(&config, NULL, 0);
+    criAtomEx_Initialize_MACOSX(config, NULL, 0);
 }
 #endif
 

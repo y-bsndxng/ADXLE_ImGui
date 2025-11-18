@@ -23,6 +23,16 @@
 #include <cri_le_atom_macosx.h>
 #endif
 
+class VoicePool {
+public:
+    VoicePool() {};
+    ~VoicePool() {};
+    void CreateVoicePool(CriAtomExStandardVoicePoolConfig* config);
+    void DestroyAllVoicePool(void);
+private:
+    std::vector<CriAtomExVoicePoolHn> voice_pools;
+};
+
 namespace ADXRuntime {
 #if defined(XPT_TGT_PC)
 	void Initialize(CriAtomExConfig_WASAPI* config);
@@ -41,13 +51,3 @@ namespace ADXRuntime {
 	/* Runtime Object */
 	inline VoicePool vp;
 }
-
-class VoicePool {
-public:
-	VoicePool() {};
-	~VoicePool() {};
-	void CreateVoicePool(CriAtomExStandardVoicePoolConfig* config);
-	void DestroyAllVoicePool(void);
-private:
-	std::vector<CriAtomExVoicePoolHn> voice_pools;
-};
