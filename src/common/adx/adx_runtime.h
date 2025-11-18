@@ -29,6 +29,25 @@ namespace ADXRuntime {
 #elif defined(XPT_TGT_MACOSX)
 	void Initialize(CriAtomExConfig_MACOSX* config);
 #endif
+#if defined(XPT_TGT_PC)
+	void Initialize(CriAtomExConfig_WASAPI* config, CriAtomExMonitorConfig* monitor_config);
+#elif defined(XPT_TGT_MACOSX)
+	void Initialize(CriAtomExConfig_MACOSX* config, CriAtomExMonitorConfig* monitor_config);
+#endif
+
 	bool IsInitilaized(void);
 	void Finalize(void);
+
+	/* Runtime Object */
+	inline VoicePool vp;
 }
+
+class VoicePool {
+public:
+	VoicePool() {};
+	~VoicePool() {};
+	void CreateVoicePool(CriAtomExStandardVoicePoolConfig* config);
+	void DestroyAllVoicePool(void);
+private:
+	std::vector<CriAtomExVoicePoolHn> voice_pools;
+};

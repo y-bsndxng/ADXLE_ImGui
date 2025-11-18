@@ -80,12 +80,14 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		CriAtomExConfig_MACOSX config;
 #endif
 		CriAtomExAcfRegistrationInfo acf_info;
+		CriAtomExMonitorConfig monitor_config;
 
 #if defined(XPT_TGT_PC) 
 		criAtomEx_SetDefaultConfig_WASAPI(&config);
 #elif defined(XPT_TGT_MACOSX)
 		criAtomEx_SetDefaultConfig_MACOSX(&config);
 #endif
+		criAtomExMonitor_SetDefaultConfig(&monitor_config);
 
 		/* エラーコールバック関数の登録 */
 		criErr_SetCallback(ADXUtils::user_error_callback_func);
@@ -109,7 +111,18 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		config.atom_ex.thread_model = thread_models[selected_thread_model_index];
 
 		/* デフォルト値の上書き */
-		ADXRuntime::Initialize(&config);
+		ADXRuntime::Initialize(&config, &monitor_config);
+	}
+
+	if (ImGuiAdx::IsInitilaized()) {
+		CriAtomExStandardVoicePoolConfig config;
+
+		criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&config);
+		config.num_voices = num_voice;
+		config.player_config.max_sampling_rate = num_sampling_rate;
+		config.player_config.streaming_flag = CRI_TRUE;
+		config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+		ADXRuntime::vp.CreateVoicePool(&config);
 	}
 
 	ImGui::End();
