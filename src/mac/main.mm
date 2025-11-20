@@ -159,7 +159,11 @@
             continue;
         }
         if (strcmp(ImGui::GetKeyName(key), "Escape") == 0) {
-            ImGuiAdx::Finalize();
+            if (ImGuiAdx::IsInitilaized()) {
+                ImGuiAdx::Finalize();
+            } else {
+                exit(0);
+            }
         }
     }
 

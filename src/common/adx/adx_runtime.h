@@ -24,16 +24,25 @@
 #include <cri_le_atom_macosx.h>
 #endif
 
+enum class VoiceType : std::uint8_t {
+    Standard,
+    RawPcm,
+    Wave
+};
+
 class VoicePool {
 public:
-	size_t num_voicepools;
     VoicePool();
     ~VoicePool() {};
     void CreateVoicePool(CriAtomExStandardVoicePoolConfig* config);
+    void CreateVoicePool(CriAtomExRawPcmVoicePoolConfig* config);
+    void CreateVoicePool(CriAtomExWaveVoicePoolConfig* config);
     void DestroyAllVoicePool(void);
-	CriAtomExVoicePoolHn GetVoicePoolHn(int32_t index);
+    CriAtomExVoicePoolHn GetVoicePoolHn(const VoiceType voice_type);
 private:
-    std::vector<CriAtomExVoicePoolHn> voice_pools;
+    CriAtomExVoicePoolHn standard_voicepool_hn;
+    CriAtomExVoicePoolHn rawpcm_voicepool_hn;
+    CriAtomExVoicePoolHn wave_voicepool_hn;
 };
 
 namespace ADXRuntime {
@@ -51,7 +60,7 @@ namespace ADXRuntime {
 	bool IsInitilaized(void);
 	void Finalize(void);
 
-	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const int32_t voicepool_index);
+	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
 
 	/* Runtime Object */
 	inline VoicePool vp;
