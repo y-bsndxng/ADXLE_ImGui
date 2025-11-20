@@ -214,7 +214,7 @@ int main(int, char**)
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
-        
+
         if (!ImGuiAdx::IsInitilaized()) {
             ImVec2 size{ 800, 500 };
             ImVec2 pos{ 100, 100 };
@@ -231,7 +231,11 @@ int main(int, char**)
                 continue;
             }
             if (strcmp(ImGui::GetKeyName(key), "Escape") == 0) {
-                ImGuiAdx::Finalize();
+                if (ImGuiAdx::IsInitilaized()) {
+                    ImGuiAdx::Finalize();
+                } else {
+                    done = true;
+                }
             }
         }
 

@@ -143,14 +143,27 @@
     // Our state (make them static = more or less global) as a convenience to keep the example terse.ß
     static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
-    ImGuiAdx::Initilaize(ImVec2{ 800, 500 }, ImVec2{ 100, 100 });
+    if (!ImGuiAdx::IsInitilaized()) {
+        ImVec2 size{ 800, 500 };
+        ImVec2 pos{ 100, 100 };
+        ImGuiAdx::Initilaize(size, pos);
+    } else {
+        ImVec2 size{ 200, 500 };
+        ImVec2 pos{ 100, 100 };
+        ImGuiAdx::Update(size, pos);
+    }
+
     for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) {
         struct funcs { static bool IsLegacyNativeDupe(ImGuiKey) { return false; } };
         if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key)) {
             continue;
         }
         if (strcmp(ImGui::GetKeyName(key), "Escape") == 0) {
-            exit(0);
+            if (ImGuiAdx::IsInitilaized()) {
+                ImGuiAdx::Finalize();
+            } else {
+                exit(0);
+            }
         }
     }
 
