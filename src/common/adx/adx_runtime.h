@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <math.h>
 #include <filesystem>
+#include <tuple>
 
 /* CRI Headers */
 #include <cri_adx2le.h>
@@ -25,10 +26,12 @@
 
 class VoicePool {
 public:
-    VoicePool() {};
+	size_t num_voicepools;
+    VoicePool();
     ~VoicePool() {};
     void CreateVoicePool(CriAtomExStandardVoicePoolConfig* config);
     void DestroyAllVoicePool(void);
+	CriAtomExVoicePoolHn GetVoicePoolHn(int32_t index);
 private:
     std::vector<CriAtomExVoicePoolHn> voice_pools;
 };
@@ -47,6 +50,8 @@ namespace ADXRuntime {
 
 	bool IsInitilaized(void);
 	void Finalize(void);
+
+	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const int32_t voicepool_index);
 
 	/* Runtime Object */
 	inline VoicePool vp;

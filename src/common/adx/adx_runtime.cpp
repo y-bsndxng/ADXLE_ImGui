@@ -48,10 +48,26 @@ void ADXRuntime::Finalize(void)
 #endif
 }
 
+std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(const int32_t voicepool_index)
+{
+	CriSint32 num_used_voices = 0;
+	CriSint32 num_max_voices = 0;
+
+	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::vp.GetVoicePoolHn(voicepool_index), &num_used_voices, &num_max_voices);
+
+	return std::make_tuple(num_used_voices, num_max_voices);
+}
+
+VoicePool::VoicePool()
+{
+	this->num_voicepools = 0;
+}
+
 void VoicePool::CreateVoicePool(CriAtomExStandardVoicePoolConfig* config)
 {
 	auto vp_hn = criAtomExVoicePool_AllocateStandardVoicePool(config, NULL, 0);
 	this->voice_pools.push_back(vp_hn);
+	this->num_voicepools = this->voice_pools.size();
 }
 
 void VoicePool::DestroyAllVoicePool(void)
@@ -62,4 +78,9 @@ void VoicePool::DestroyAllVoicePool(void)
 		}
 		this->voice_pools.clear();
 	}
+}
+
+CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(int32_t index)
+{
+	return this->voice_pools.at(index);
 }
