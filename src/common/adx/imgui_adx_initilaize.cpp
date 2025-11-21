@@ -74,7 +74,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SliderInt("Number of Player", &num_player, 1, 10);
 
 	if (ImGui::Button("Initialize")) {
-		Config config;
+		ADXRuntime::Config config;
 		CriAtomExAcfRegistrationInfo acf_info;
 
 		/* エラーコールバック関数の登録 */
@@ -98,37 +98,28 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		config.specific_config.atom_ex.max_virtual_voices = num_virtual_voice;
 		config.specific_config.atom_ex.thread_model = thread_models[selected_thread_model_index];
 
-		/* デフォルト値の上書き */
+		/* 初期化 */
 		ADXRuntime::Initialize(config);
 	}
 
 	if (ImGuiAdx::IsInitilaized()) {
-		{
-			CriAtomExStandardVoicePoolConfig config;
-			criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&config);
-			config.num_voices = num_voice;
-			config.player_config.max_sampling_rate = num_sampling_rate;
-			config.player_config.streaming_flag = CRI_TRUE;
-			config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-			ADXRuntime::vp.CreateVoicePool(&config);
-		}
-		{
-			CriAtomExRawPcmVoicePoolConfig config;
-			criAtomExVoicePool_SetDefaultConfigForRawPcmVoicePool(&config);
-			config.num_voices = num_voice;
-			config.player_config.max_sampling_rate = num_sampling_rate;
-			config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-			ADXRuntime::vp.CreateVoicePool(&config);
-		}
-		{
-			CriAtomExWaveVoicePoolConfig config;
-			criAtomExVoicePool_SetDefaultConfigForWaveVoicePool(&config);
-			config.num_voices = num_voice;
-			config.player_config.max_sampling_rate = num_sampling_rate;
-			config.player_config.streaming_flag = CRI_TRUE;
-			config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-			ADXRuntime::vp.CreateVoicePool(&config);
-		}
+        VoicePool::Config config;
+
+        config.standard_config.num_voices = num_voice;
+        config.rawpcm_config.num_voices = num_voice;
+        config.wave_config.num_voices = num_voice;
+
+        config.standard_config.player_config.max_sampling_rate = num_sampling_rate;
+        config.rawpcm_config.player_config.max_sampling_rate = num_sampling_rate;
+        config.wave_config.player_config.max_sampling_rate = num_sampling_rate;
+
+        config.standard_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        config.rawpcm_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        config.wave_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+
+        config.standard_config.player_config.streaming_flag = CRI_TRUE;
+
+        ADXRuntime::vp.CreateVoicePool(config);
 	}
 
 	ImGui::End();

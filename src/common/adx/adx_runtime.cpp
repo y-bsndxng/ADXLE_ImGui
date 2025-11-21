@@ -1,6 +1,6 @@
 #include <adx_runtime.h>
 
-void ADXRuntime::Initialize(const Config& config)
+void ADXRuntime::Initialize(const ADXRuntime::Config& config)
 {
 #if defined(XPT_TGT_PC)
 	criAtomEx_Initialize_WASAPI(&config.specific_config, NULL, 0);
@@ -43,26 +43,25 @@ std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_ty
 	return std::make_tuple(num_used_voices, num_max_voices);
 }
 
-VoicePool::VoicePool() 
+VoicePool::Config::Config()
+{
+    criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&this->standard_config);
+    criAtomExVoicePool_SetDefaultConfigForRawPcmVoicePool(&this->rawpcm_config);
+    criAtomExVoicePool_SetDefaultConfigForWaveVoicePool(&this->wave_config);
+}
+
+VoicePool::VoicePool()
 {
     this->standard_voicepool_hn = NULL;
     this->rawpcm_voicepool_hn = NULL;
     this->wave_voicepool_hn = NULL;
 }
 
-void VoicePool::CreateVoicePool(CriAtomExStandardVoicePoolConfig* config)
+void VoicePool::CreateVoicePool(const VoicePool::Config& config)
 {
-	this->standard_voicepool_hn = criAtomExVoicePool_AllocateStandardVoicePool(config, NULL, 0);
-}
-
-void VoicePool::CreateVoicePool(CriAtomExRawPcmVoicePoolConfig* config)
-{
-    this->rawpcm_voicepool_hn = criAtomExVoicePool_AllocateRawPcmVoicePool(config, NULL, 0);
-}
-
-void VoicePool::CreateVoicePool(CriAtomExWaveVoicePoolConfig* config)
-{
-    this->wave_voicepool_hn = criAtomExVoicePool_AllocateWaveVoicePool(config, NULL, 0);
+	this->standard_voicepool_hn = criAtomExVoicePool_AllocateStandardVoicePool(&config.standard_config, NULL, 0);
+    this->rawpcm_voicepool_hn = criAtomExVoicePool_AllocateRawPcmVoicePool(&config.rawpcm_config, NULL, 0);
+    this->wave_voicepool_hn = criAtomExVoicePool_AllocateWaveVoicePool(&config.wave_config, NULL, 0);
 }
 
 void VoicePool::DestroyAllVoicePool(void)
@@ -99,9 +98,9 @@ CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(const VoiceType voice_type)
     return vp_hn;
 }
 
-Config::Config()
+ADXRuntime::Config::Config()
 {
-#if defined(XPT_TGT_PC) 
+#if defined(XPT_TGT_PC)
     criAtomEx_SetDefaultConfig_WASAPI(&this->specific_config);
 #elif defined(XPT_TGT_MACOSX)
     criAtomEx_SetDefaultConfig_MACOSX(&this->specific_config);
