@@ -233,8 +233,7 @@ int main(int, char**)
             if (strcmp(ImGui::GetKeyName(key), "Escape") == 0) {
                 if (ImGuiAdx::IsInitilaized()) {
                     ImGuiAdx::Finalize();
-                } else {
-                    done = true;
+                    Sleep(10);
                 }
             }
         }

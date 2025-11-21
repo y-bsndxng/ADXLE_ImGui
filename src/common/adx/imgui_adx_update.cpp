@@ -52,7 +52,7 @@ static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             ImGui::TableSetColumnIndex(1); ImGui::Text("%3d / %3d", num_used_voices, num_max_voices);
             ImGui::EndTable();
         }
-        
+
         if (ImGui::BeginTable("Voice Pool Table", 2, flags)) {
             ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Ptr", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);

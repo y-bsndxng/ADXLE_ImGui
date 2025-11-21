@@ -1,32 +1,14 @@
 #include <adx_runtime.h>
 
+void ADXRuntime::Initialize(const ADXRuntime::Config& config)
+{
 #if defined(XPT_TGT_PC)
-void ADXRuntime::Initialize(CriAtomExConfig_WASAPI* config)
-{
-	criAtomEx_Initialize_WASAPI(config, NULL, 0);
-
-}
+	criAtomEx_Initialize_WASAPI(&config.specific_config, NULL, 0);
 #elif defined(XPT_TGT_MACOSX)
-void ADXRuntime::Initialize(CriAtomExConfig_MACOSX* config) 
-{
-    criAtomEx_Initialize_MACOSX(config, NULL, 0);
-}
+    criAtomEx_Initialize_MACOSX(&config.specific_config, NULL, 0);
 #endif
-
-#if defined(XPT_TGT_PC)
-void ADXRuntime::Initialize(CriAtomExConfig_WASAPI* config, CriAtomExMonitorConfig* monitor_config)
-{
-	ADXRuntime::Initialize(config);
-	criAtomExMonitor_Initialize(monitor_config, NULL, 0);
+    criAtomExMonitor_Initialize(&config.monitor_config, NULL, 0);
 }
-#elif defined(XPT_TGT_MACOSX)
-void ADXRuntime::Initialize(CriAtomExConfig_MACOSX* config, CriAtomExMonitorConfig* monitor_config)
-{
-	ADXRuntime::Initialize(config);
-	criAtomExMonitor_Initialize(monitor_config, NULL, 0);
-}
-#endif
-
 
 bool ADXRuntime::IsInitilaized(void)
 {
@@ -41,6 +23,9 @@ bool ADXRuntime::IsInitilaized(void)
 
 void ADXRuntime::Finalize(void)
 {
+    ADXRuntime::vp.DestroyAllVoicePool();
+
+    criAtomExMonitor_Finalize();
 #if defined(XPT_TGT_PC)
 	criAtomEx_Finalize_WASAPI();
 #elif defined(XPT_TGT_MACOSX)
@@ -53,25 +38,30 @@ std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_ty
 	CriSint32 num_used_voices = 0;
 	CriSint32 num_max_voices = 0;
 
-	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::vp.GetVoicePoolHn(VoiceType::Standard), &num_used_voices, &num_max_voices);
+	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::vp.GetVoicePoolHn(voice_type), &num_used_voices, &num_max_voices);
 
 	return std::make_tuple(num_used_voices, num_max_voices);
 }
 
-
-void VoicePool::CreateVoicePool(CriAtomExStandardVoicePoolConfig* config)
+VoicePool::Config::Config()
 {
-	this->standard_voicepool_hn = criAtomExVoicePool_AllocateStandardVoicePool(config, NULL, 0);
+    criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&this->standard_config);
+    criAtomExVoicePool_SetDefaultConfigForRawPcmVoicePool(&this->rawpcm_config);
+    criAtomExVoicePool_SetDefaultConfigForWaveVoicePool(&this->wave_config);
 }
 
-void VoicePool::CreateVoicePool(CriAtomExRawPcmVoicePoolConfig* config)
+VoicePool::VoicePool()
 {
-    this->rawpcm_voicepool_hn = criAtomExVoicePool_AllocateRawPcmVoicePool(config, NULL, 0);
+    this->standard_voicepool_hn = NULL;
+    this->rawpcm_voicepool_hn = NULL;
+    this->wave_voicepool_hn = NULL;
 }
 
-void VoicePool::CreateVoicePool(CriAtomExWaveVoicePoolConfig* config)
+void VoicePool::CreateVoicePool(const VoicePool::Config& config)
 {
-    this->wave_voicepool_hn = criAtomExVoicePool_AllocateWaveVoicePool(config, NULL, 0);
+	this->standard_voicepool_hn = criAtomExVoicePool_AllocateStandardVoicePool(&config.standard_config, NULL, 0);
+    this->rawpcm_voicepool_hn = criAtomExVoicePool_AllocateRawPcmVoicePool(&config.rawpcm_config, NULL, 0);
+    this->wave_voicepool_hn = criAtomExVoicePool_AllocateWaveVoicePool(&config.wave_config, NULL, 0);
 }
 
 void VoicePool::DestroyAllVoicePool(void)
@@ -89,7 +79,7 @@ void VoicePool::DestroyAllVoicePool(void)
 
 CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(const VoiceType voice_type)
 {
-    CriAtomExVoicePoolHn vp_hn;
+    CriAtomExVoicePoolHn vp_hn = NULL;
 
     switch (voice_type) {
         case VoiceType::Standard:
@@ -108,3 +98,12 @@ CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(const VoiceType voice_type)
     return vp_hn;
 }
 
+ADXRuntime::Config::Config()
+{
+#if defined(XPT_TGT_PC)
+    criAtomEx_SetDefaultConfig_WASAPI(&this->specific_config);
+#elif defined(XPT_TGT_MACOSX)
+    criAtomEx_SetDefaultConfig_MACOSX(&this->specific_config);
+#endif
+    criAtomExMonitor_SetDefaultConfig(&this->monitor_config);
+}
