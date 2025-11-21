@@ -45,18 +45,20 @@ private:
     CriAtomExVoicePoolHn wave_voicepool_hn;
 };
 
-namespace ADXRuntime {
+struct Config {
+public:
+    Config();
+    ~Config() {};
 #if defined(XPT_TGT_PC)
-	void Initialize(CriAtomExConfig_WASAPI* config);
+    CriAtomExConfig_WASAPI specific_config;
 #elif defined(XPT_TGT_MACOSX)
-	void Initialize(CriAtomExConfig_MACOSX* config);
+    CriAtomExConfig_MACOSX specific_config;
 #endif
-#if defined(XPT_TGT_PC)
-	void Initialize(CriAtomExConfig_WASAPI* config, CriAtomExMonitorConfig* monitor_config);
-#elif defined(XPT_TGT_MACOSX)
-	void Initialize(CriAtomExConfig_MACOSX* config, CriAtomExMonitorConfig* monitor_config);
-#endif
+    CriAtomExMonitorConfig monitor_config;
+};
 
+namespace ADXRuntime {
+	void Initialize(const Config& config);
 	bool IsInitilaized(void);
 	void Finalize(void);
 
