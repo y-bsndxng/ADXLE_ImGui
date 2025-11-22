@@ -17,6 +17,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 
 	ImGui::Begin("Update", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
+	ImGui::Text("Error : %s", ADXUtils::GetErrorMessage().c_str());
 	if (ImGui::TreeNode("VoicePool")) {
 		if (ImGui::Button("Open")) {
 			is_open_voicepool_window = true;
@@ -26,7 +27,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_voicepool_window = false;
 		}
 		if (is_open_voicepool_window) {
-			VoicePoolWindow(ImGuiUtils::AddOffsetY(size, 100.0f), ImGuiUtils::AddOffsetX(pos, 300.0f), &is_open_voicepool_window);
+			VoicePoolWindow(ImGuiUtils::AddOffset(size, 100.0f), ImGuiUtils::AddOffsetX(pos, 300.0f), &is_open_voicepool_window);
 		}
 		ImGui::TreePop();
 	}
@@ -40,9 +41,22 @@ static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	ImGui::SetNextWindowPos(ImGuiUtils::AddOffsetX(pos, 300.0f), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("VoicePool", is_open, ImGuiWindowFlags_NoSavedSettings);
+	std::string caption = "VoiceType";
+	std::vector<std::string> names;
+	static int32_t selected_index;
+	static VoiceType voice_type = VoiceType::Standard;
+    std::vector<VoiceType> voice_types = {
+		VoiceType::Standard,
+		VoiceType::RawPcm,
+		VoiceType::Wave
+    };
 
-    if (ADXRuntime::vp.GetVoicePoolHn(VoiceType::Standard) != NULL) {
-        auto [num_used_voices, num_max_voices] = ADXRuntime::GetNumUsedVoicePools(VoiceType::Standard);
+	std::transform(voice_types.begin(), voice_types.end(), std::back_inserter(names), [](const VoiceType v) { return ADXUtils::GetVoiceTypeString(v); });
+	ImGuiUtils::Comboui(&caption, &selected_index, &names);
+	voice_type = voice_types.at(selected_index);
+
+    if (ADXRuntime::vp.GetVoicePoolHn(voice_type) != NULL) {
+        auto [num_used_voices, num_max_voices] = ADXRuntime::GetNumUsedVoicePools(voice_type);
         if (ImGui::BeginTable("Voice Pool Info Table", 2)) {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Ptr");
@@ -58,7 +72,7 @@ static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             ImGui::TableSetupColumn("Ptr", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableHeadersRow();
             for (int32_t i = 0; i < num_max_voices; i++) {
-                auto vp_hn = ADXRuntime::vp.GetVoicePoolHn(VoiceType::Standard);
+                auto vp_hn = ADXRuntime::vp.GetVoicePoolHn(voice_type);
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("%5d", i);

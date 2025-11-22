@@ -24,6 +24,7 @@ bool ADXRuntime::IsInitilaized(void)
 void ADXRuntime::Finalize(void)
 {
     ADXRuntime::vp.DestroyAllVoicePool();
+    ADXRuntime::player.DestroyAllPlayer();
 
     criAtomExMonitor_Finalize();
 #if defined(XPT_TGT_PC)
@@ -98,6 +99,52 @@ CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(const VoiceType voice_type)
     return vp_hn;
 }
 
+Player::Config::Config() 
+{
+    this->num_players = 0;
+    criAtomExPlayer_SetDefaultConfig(&this->player_config);
+    criAtomEx3dSource_SetDefaultConfig(&this->source_config);
+    criAtomEx3dListener_SetDefaultConfig(&this->listener_config);
+}
+
+void Player::Player::CreatePlayer(const Player::Config& config)
+{
+    this->players.resize(config.num_players);
+    this->sources.resize(config.num_players);
+    this->listeners.resize(config.num_players);
+
+    for (int32_t i = 0; i < config.num_players; i++) {
+        this->players.at(i) = criAtomExPlayer_Create(&config.player_config, NULL, 0);
+        this->sources.at(i) = criAtomEx3dSource_Create(&config.source_config, NULL, 0);
+        this->listeners.at(i) = criAtomEx3dListener_Create(&config.listener_config, NULL, 0);
+
+        criAtomExPlayer_Set3dSourceHn(this->players.at(i), this->sources.at(i));
+        criAtomExPlayer_Set3dListenerHn(this->players.at(i), this->listeners.at(i));
+        criAtomExPlayer_UpdateAll(this->players.at(i));
+    }
+}
+
+void Player::Player::DestroyAllPlayer(void)
+{
+    for (const auto& player : this->players) {
+        criAtomExPlayer_Set3dSourceHn(player, NULL);
+        criAtomExPlayer_Set3dListenerHn(player, NULL);
+        criAtomExPlayer_UpdateAll(player);
+        criAtomExPlayer_Destroy(player);
+    }
+    this->players.clear();
+
+    for (const auto& source : this->sources) {
+        criAtomEx3dSource_Destroy(source);
+    }
+    this->sources.clear();
+
+    for (const auto& listener : this->listeners) {
+        criAtomEx3dListener_Destroy(listener);
+    }
+    this->listeners.clear();
+}
+
 ADXRuntime::Config::Config()
 {
 #if defined(XPT_TGT_PC)
@@ -105,5 +152,6 @@ ADXRuntime::Config::Config()
 #elif defined(XPT_TGT_MACOSX)
     criAtomEx_SetDefaultConfig_MACOSX(&this->specific_config);
 #endif
-    criAtomExMonitor_SetDefaultConfig(&this->monitor_config);
+    criAtomExMonitor_SetDefaultConfig(&this->monitor_config); 
+    memset(&this->acf_info, 0, sizeof(CriAtomExAcfRegistrationInfo));
 }
