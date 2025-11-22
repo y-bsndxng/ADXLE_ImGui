@@ -50,6 +50,26 @@ private:
     CriAtomExVoicePoolHn wave_voicepool_hn;
 };
 
+class Player {
+public:
+    struct Config {
+        Config();
+        ~Config() {};
+        int32_t num_players;
+        CriAtomExPlayerConfig player_config;
+        CriAtomEx3dSourceConfig source_config;
+        CriAtomEx3dListenerConfig listener_config;
+    };
+    Player() {};
+    ~Player() {};
+    void CreatePlayer(const Player::Config& config);
+    void DestroyAllPlayer(void);
+private:
+    std::vector<CriAtomExPlayerHn> players;
+    std::vector<CriAtomEx3dSourceHn> sources;
+    std::vector<CriAtomEx3dListenerHn> listeners;
+};
+
 namespace ADXRuntime {
     struct Config {
         Config();
@@ -60,6 +80,7 @@ namespace ADXRuntime {
         CriAtomExConfig_MACOSX specific_config;
         #endif
         CriAtomExMonitorConfig monitor_config;
+		CriAtomExAcfRegistrationInfo acf_info;
     };
 	void Initialize(const ADXRuntime::Config& config);
 	bool IsInitilaized(void);
@@ -69,4 +90,5 @@ namespace ADXRuntime {
 
 	/* Runtime Object */
 	inline VoicePool vp;
+    inline Player player;
 }

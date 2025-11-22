@@ -14,7 +14,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	static int32_t num_sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
 	static int32_t num_voice = 64;
 	static int32_t num_virtual_voice = 256;
-	static int32_t num_player = 5;
+	static int32_t num_players = 5;
 	ImVec2 file_dialog_window_size = { 800, 600 };
 	std::string ui_caption;
 
@@ -71,27 +71,26 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SliderInt("Number of Sampling Rate", &num_sampling_rate, 0, 192000);
 	ImGui::SliderInt("Number of Voice", &num_voice, 1, 256);
 	ImGui::SliderInt("Number of Virtual Voice", &num_virtual_voice, 1, 256);
-	ImGui::SliderInt("Number of Player", &num_player, 1, 10);
+	ImGui::SliderInt("Number of Player", &num_players, 1, 10);
 
 	if (ImGui::Button("Initialize")) {
 		ADXRuntime::Config config;
-		CriAtomExAcfRegistrationInfo acf_info;
 
 		/* エラーコールバック関数の登録 */
-		criErr_SetCallback(ADXUtils::user_error_callback_func);
+		criErr_SetCallback(ADXUtils::UserErrorCallBackFunc);
 		/* メモリアロケータの登録 */
-		criAtomEx_SetUserAllocator(ADXUtils::user_alloc_func, ADXUtils::user_free_func, NULL);
+		criAtomEx_SetUserAllocator(ADXUtils::UserAllocFunc, ADXUtils::UserFreeFunc, NULL);
 
 		/* ACF情報の設定 */
-		acf_info.type = CRIATOMEX_ACF_LOCATION_INFO_TYPE_NAME;
-		acf_info.info.name.binder = NULL;
-		acf_info.info.name.path = acf_file;
+		config.acf_info.type = CRIATOMEX_ACF_LOCATION_INFO_TYPE_NAME;
+		config.acf_info.info.name.binder = NULL;
+		config.acf_info.info.name.path = acf_file;
 
 		/* ACF ファイル名が空ならファイルなし初期化 */
 		if (strlen(acf_file) == 0) {
 			config.specific_config.atom_ex.acf_info = NULL;
 		} else {
-			config.specific_config.atom_ex.acf_info = &acf_info;
+			config.specific_config.atom_ex.acf_info = &config.acf_info;
 		}
 		config.specific_config.asr.output_sampling_rate = num_sampling_rate;
 		config.specific_config.hca_mx.max_sampling_rate = num_sampling_rate;
@@ -103,23 +102,27 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	}
 
 	if (ImGuiAdx::IsInitilaized()) {
-        VoicePool::Config config;
+        VoicePool::Config voicepool_config;
+		Player::Config player_config;
 
-        config.standard_config.num_voices = num_voice;
-        config.rawpcm_config.num_voices = num_voice;
-        config.wave_config.num_voices = num_voice;
+        voicepool_config.standard_config.num_voices = num_voice;
+        voicepool_config.rawpcm_config.num_voices = num_voice;
+        voicepool_config.wave_config.num_voices = num_voice;
 
-        config.standard_config.player_config.max_sampling_rate = num_sampling_rate;
-        config.rawpcm_config.player_config.max_sampling_rate = num_sampling_rate;
-        config.wave_config.player_config.max_sampling_rate = num_sampling_rate;
+        voicepool_config.standard_config.player_config.max_sampling_rate = num_sampling_rate;
+        voicepool_config.rawpcm_config.player_config.max_sampling_rate = num_sampling_rate;
+        voicepool_config.wave_config.player_config.max_sampling_rate = num_sampling_rate;
 
-        config.standard_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-        config.rawpcm_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-        config.wave_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.standard_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.rawpcm_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.wave_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
 
-        config.standard_config.player_config.streaming_flag = CRI_TRUE;
+        voicepool_config.standard_config.player_config.streaming_flag = CRI_TRUE;
 
-        ADXRuntime::vp.CreateVoicePool(config);
+		player_config.num_players = num_players;
+
+        ADXRuntime::vp.CreateVoicePool(voicepool_config);
+		ADXRuntime::player.CreatePlayer(player_config);
 	}
 
 	ImGui::End();

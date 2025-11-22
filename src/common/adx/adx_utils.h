@@ -1,14 +1,17 @@
 #pragma once
 
 #include <cstdio>
-#include <cstdlib>
 /* CRI Headers */
 #include <cri_adx2le.h>
+
+#include <adx_runtime.h>
 
 #define UNUSED(arg) if(arg == arg) {}
 
 namespace ADXUtils {
-	void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray);
-	void* user_alloc_func(void* obj, CriUint32 size);
-	void user_free_func(void* obj, void* ptr);
+	void UserErrorCallBackFunc(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray);
+	std::string GetErrorMessage(void);
+	void* UserAllocFunc(void* obj, CriUint32 size);
+	void UserFreeFunc(void* obj, void* ptr);
+	std::string GetVoiceTypeString(const VoiceType voice_type);
 }
