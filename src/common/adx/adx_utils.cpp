@@ -36,21 +36,34 @@ void ADXUtils::UserFreeFunc(void* obj, void* ptr)
 
 std::string ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
 {
-	std::string ret = "";
-
 	switch (voice_type) {
 	case VoiceType::Standard:
-		ret = "Standard";
-		break;
+		return "Standard";
 	case VoiceType::RawPcm:
-		ret = "RawPcm";
-		break;
+		return "RawPcm";
 	case VoiceType::Wave:
-		ret = "Wave";
-		break;
+		return "Wave";
 	default:
-		break;
+        return "UNKNOWN";
 	}
+}
 
-	return ret;
+std::string ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
+{
+    auto status = criAtomExPlayer_GetStatus(player);
+
+    switch (status) {
+    case CRIATOMEXPLAYER_STATUS_STOP:
+        return "STOP";
+    case CRIATOMEXPLAYER_STATUS_PREP:
+        return "PREP";
+    case CRIATOMEXPLAYER_STATUS_PLAYEND:
+        return "PLAYEND";
+    case CRIATOMEXPLAYER_STATUS_PLAYING:
+        return "PLAYING";
+    case CRIATOMEXPLAYER_STATUS_ERROR:
+        return "ERROR";
+    default:
+        return "UNKNOWN";
+    }
 }

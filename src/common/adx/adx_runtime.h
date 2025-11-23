@@ -13,6 +13,7 @@
 #include <math.h>
 #include <filesystem>
 #include <tuple>
+#include <cassert>
 
 /* CRI Headers */
 #include <cri_adx2le.h>
@@ -62,8 +63,10 @@ public:
     };
     Player() {};
     ~Player() {};
+    int32_t num_players = 0;
     void CreatePlayer(const Player::Config& config);
     void DestroyAllPlayer(void);
+    CriAtomExPlayerHn GetPlayerHn(const int32_t& player_index);
 private:
     std::vector<CriAtomExPlayerHn> players;
     std::vector<CriAtomEx3dSourceHn> sources;

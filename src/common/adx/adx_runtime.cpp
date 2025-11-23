@@ -109,11 +109,12 @@ Player::Config::Config()
 
 void Player::Player::CreatePlayer(const Player::Config& config)
 {
-    this->players.resize(config.num_players);
-    this->sources.resize(config.num_players);
-    this->listeners.resize(config.num_players);
+    this->num_players = config.num_players;
+    this->players.resize(this->num_players);
+    this->sources.resize(this->num_players);
+    this->listeners.resize(this->num_players);
 
-    for (int32_t i = 0; i < config.num_players; i++) {
+    for (int32_t i = 0; i < this->num_players; i++) {
         this->players.at(i) = criAtomExPlayer_Create(&config.player_config, NULL, 0);
         this->sources.at(i) = criAtomEx3dSource_Create(&config.source_config, NULL, 0);
         this->listeners.at(i) = criAtomEx3dListener_Create(&config.listener_config, NULL, 0);
@@ -122,6 +123,10 @@ void Player::Player::CreatePlayer(const Player::Config& config)
         criAtomExPlayer_Set3dListenerHn(this->players.at(i), this->listeners.at(i));
         criAtomExPlayer_UpdateAll(this->players.at(i));
     }
+
+    assert((size_t)this->num_players == this->players.size());
+    assert((size_t)this->num_players == this->sources.size());
+    assert((size_t)this->num_players == this->listeners.size());
 }
 
 void Player::Player::DestroyAllPlayer(void)
@@ -143,6 +148,15 @@ void Player::Player::DestroyAllPlayer(void)
         criAtomEx3dListener_Destroy(listener);
     }
     this->listeners.clear();
+}
+
+CriAtomExPlayerHn Player::GetPlayerHn(const int32_t& player_index)
+{
+    auto player = this->players.at(player_index);
+
+    assert(player != NULL);
+
+    return player;
 }
 
 ADXRuntime::Config::Config()
