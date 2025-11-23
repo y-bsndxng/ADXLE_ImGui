@@ -518,14 +518,15 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
+				EXCLUDED_ARCHS = "";
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Info-iOS.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../cri/ios/libs";
+				OTHER_LDFLAGS = "-lcri_ware_ios_LE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-ios";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = iphoneos;
@@ -535,9 +536,10 @@
 					"$(SRCROOT)/../../external/imgui_filedialog",
 					"$(SRCROOT)/../../src/common/imgui_utils",
 					"$(SRCROOT)/../../src/common/adx",
+					"$(SRCROOT)/../../cri/ios/include",
 				);
 				TARGETED_DEVICE_FAMILY = "1,2";
-				USER_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../..";
 			};
 			name = Debug;
 		};
@@ -547,14 +549,15 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
+				EXCLUDED_ARCHS = "";
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Info-iOS.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../cri/ios/libs";
+				OTHER_LDFLAGS = "-lcri_ware_ios_LE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-ios";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = iphoneos;
@@ -564,9 +567,10 @@
 					"$(SRCROOT)/../../external/imgui_filedialog",
 					"$(SRCROOT)/../../src/common/imgui_utils",
 					"$(SRCROOT)/../../src/common/adx",
+					"$(SRCROOT)/../../cri/ios/include",
 				);
 				TARGETED_DEVICE_FAMILY = "1,2";
-				USER_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../..";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -590,7 +594,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-macos";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../**";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../..";
 			};
 			name = Debug;
 		};
@@ -613,7 +617,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.imgui.example.apple-metal-macos";
 				PRODUCT_NAME = example_apple_metal;
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../**";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../..";
 			};
 			name = Release;
 		};

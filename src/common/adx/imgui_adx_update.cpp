@@ -30,7 +30,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_voicepool_window = false;
 		}
 		if (is_open_voicepool_window) {
-			VoicePoolWindow(ImGuiUtils::AddOffset(size, 100.0f), ImGuiUtils::AddOffsetX(pos, 300.0f), &is_open_voicepool_window);
+            auto vp_window_size = ImGuiUtils::AddOffset(size, 100.0f);
+			VoicePoolWindow(vp_window_size, ImGuiUtils::AddOffsetX(pos, 300.0f), &is_open_voicepool_window);
 		}
 		ImGui::TreePop();
 	}
@@ -43,7 +44,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_player_window = false;
 		}
 		if (is_open_player_window) {
-			PlayerWindow(ImGuiUtils::AddOffset(size, 100.0f), ImGuiUtils::AddOffsetX(pos, 300.0f), &is_open_player_window);
+            ImVec2 player_window_size { size.x + 200.0f, size.y };
+			PlayerWindow(player_window_size, ImGuiUtils::AddOffsetX(pos, 200.0f), &is_open_player_window);
 		}
 		ImGui::TreePop();
 	}
@@ -109,6 +111,8 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	static int32_t selected_index = 0;
 	std::vector<std::string> names;
 	CriAtomExPlayerHn player;
+    static bool is_auto_update = false;
+    static bool is_loop = false;
 
 	names.resize(ADXRuntime::player.num_players);
 	for (int32_t i = 0; i < ADXRuntime::player.num_players; i++) {
@@ -117,7 +121,8 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	ImGuiUtils::Comboui("Player", &selected_index, &names);
 
 	player = ADXRuntime::player.GetPlayerHn(selected_index);
-
+    
+    ImGui::Separator();
 	if (ImGui::BeginTable("Table##player", 2)) {
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Player Ptr");
@@ -127,13 +132,112 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 		ImGui::TableSetColumnIndex(1); ImGui::Text("%s", ADXUtils::GetPlayerStatusString(player).c_str());
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Player Samples");
-		ImGui::TableSetColumnIndex(1); ImGui::Text("%d", criAtomExPlayer_GetTimeReal(player));
+		ImGui::TableSetColumnIndex(1); ImGui::Text("%lld", criAtomExPlayer_GetTimeReal(player));
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Playbacks");
 		ImGui::TableSetColumnIndex(1); ImGui::Text("%d", criAtomExPlayer_GetNumPlaybacks(player));
 		ImGui::TableNextRow();
 		ImGui::EndTable();
 	}
+    
+    ImGui::Separator();
+    if (ImGui::Button("Start")) {
+        auto playback_id = criAtomExPlayer_Start(player);
+        ADXRuntime::playback_ids.push_back(playback_id);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Stop")) {
+        criAtomExPlayer_Stop(player);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Stop without Release Time")) {
+        criAtomExPlayer_StopWithoutReleaseTime(player);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Update")) {
+        criAtomExPlayer_UpdateAll(player);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset")) {
+        criAtomExPlayer_ResetParameters(player);
+        criAtomExPlayer_UpdateAll(player);
+    }
+    if (ImGui::Button("Pause")) {
+        criAtomExPlayer_Pause(player, CRI_TRUE);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Prepare")) {
+        criAtomExPlayer_Prepare(player);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Resume")) {
+        criAtomExPlayer_Resume(player, CRIATOMEX_RESUME_PREPARED_PLAYBACK);
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("Auto Update", &is_auto_update);
+    if (is_auto_update != false) {
+        criAtomExPlayer_UpdateAll(player);
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("Loop Play", &is_loop);
+    if (is_loop != false) {
+        criAtomExPlayer_LimitLoopCount(player, CRIATOMEXPLAYER_FORCE_LOOP);
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("Volume")) {
+        static float volume = 1.0f;
+        ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f);
+        criAtomExPlayer_SetVolume(player, volume);
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("Start Time")) {
+        static ImU32 start_time = 0;
+        const float drag_speed = 0.2f;
+        const ImU32 u32_zero = 0, u32_fifty = 50;
+        static bool drag_clamp = false;
+        ImGui::Checkbox("Clamp integers to 0..50", &drag_clamp);
+        ImGui::DragScalar("Start Time[ms]", ImGuiDataType_U32, &start_time, drag_speed, drag_clamp ? &u32_zero : NULL, drag_clamp ? &u32_fifty : NULL, "%u ms");
+        criAtomExPlayer_SetStartTime(player, start_time);
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("Pitch")) {
+        static float pitch = 0.0f;
+        ImGui::InputFloat("Pitch", &pitch);
+        pitch = (pitch < 0.0f) ? 0.0f : pitch;
+        pitch = (pitch > 192000) ? 192000 : pitch;
+        criAtomExPlayer_SetPitch(player, pitch);
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("Pan3d")) {
+        static float pan3d_angle = 0.0f;
+        static float pan3d_elevation = 0.0f;
+        static float pan3d_distance = 1.0f;
 
+        criAtomExPlayer_SetPanType(player, CRIATOMEX_PAN_TYPE_PAN3D);
+
+        ImGui::SliderFloat("Pan3d Angle", &pan3d_angle, -180.0f, 180.0f);
+        ImGui::SliderFloat("Pan3d Elevation", &pan3d_elevation, -180.0f, 180.0f);
+        ImGui::SliderFloat("Pan3d Distance", &pan3d_distance, 0.0f, 1.0f);
+        criAtomExPlayer_SetPan3dAngle(player, pan3d_angle);
+#if (CRI_ATOM_VER_MINOR) >= (28)
+        criAtomExPlayer_SetPan3dElevation(player, pan3d_elevation);
+#endif
+        criAtomExPlayer_SetPan3dInteriorDistance(player, pan3d_distance);
+
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("AISAC")) {
+        static int32_t aisac_cointrol_id = 0;
+        static float aisac_control_value = 0.0f;
+        ImGui::InputInt("Control ID", &aisac_cointrol_id);
+        ImGui::SliderFloat("Control Value", &aisac_control_value, 0.0f, 1.0f);
+        criAtomExPlayer_SetAisacControlById(player, aisac_cointrol_id, aisac_control_value);
+        ImGui::TreePop();
+    }
+    
 	ImGui::End();
 }

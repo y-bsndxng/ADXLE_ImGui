@@ -84,14 +84,20 @@ namespace ADXRuntime {
         #endif
         CriAtomExMonitorConfig monitor_config;
 		CriAtomExAcfRegistrationInfo acf_info;
+        CriAtomExDbasConfig dbas_config;
     };
 	void Initialize(const ADXRuntime::Config& config);
 	bool IsInitilaized(void);
 	void Finalize(void);
+    void LoadFile(const char* acb_file, const char* awb_file);
+    void UnloadFile(void);
 
 	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
 
 	/* Runtime Object */
 	inline VoicePool vp;
     inline Player player;
+    inline std::vector<CriAtomExPlaybackId> playback_ids;
+    inline CriAtomExAcbHn acb_hn;
+    inline CriAtomExDbasId dbas_id;
 }
