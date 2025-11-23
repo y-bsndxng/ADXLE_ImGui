@@ -16,7 +16,6 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	static int32_t num_virtual_voice = 256;
 	static int32_t num_players = 5;
 	ImVec2 file_dialog_window_size = { 800, 600 };
-	std::string ui_caption;
 
 	ImGui::SetNextWindowPos(pos);
 	ImGui::SetNextWindowSize(size);
@@ -66,8 +65,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	}
 
 	ImGui::Separator();
-	ui_caption = "ThreadModel";
-	ImGuiUtils::Comboui(&ui_caption, &selected_thread_model_index, &thread_models_items);
+	ImGuiUtils::Comboui("ThreadModel", & selected_thread_model_index, & thread_models_items);
 	ImGui::SliderInt("Number of Sampling Rate", &num_sampling_rate, 0, 192000);
 	ImGui::SliderInt("Number of Voice", &num_voice, 1, 256);
 	ImGui::SliderInt("Number of Virtual Voice", &num_virtual_voice, 1, 256);

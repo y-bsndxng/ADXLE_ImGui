@@ -7,7 +7,7 @@
 #include <ImGuiFileDialog.h>
 
 namespace ImGuiUtils {
-	inline bool Comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items);
+	inline bool Comboui(const std::string& caption, int32_t* current_item_index, const std::vector<std::string>* items);
 	inline void Rightalign(const char* text);
 	inline void OpenDialog(const char* dialog_name, char* select_file_name);
 	inline ImVec2 AddOffsetX(const ImVec2& v, float offset);
@@ -15,11 +15,11 @@ namespace ImGuiUtils {
 	inline ImVec2 AddOffset(const ImVec2& v, float offset);
 }
 
-inline bool ImGuiUtils::Comboui(const std::string* caption, int32_t* current_item_index, const std::vector<std::string>* items)
+inline bool ImGuiUtils::Comboui(const std::string& caption, int32_t* current_item_index, const std::vector<std::string>* items)
 {
 	bool changed = false;
 
-	if (ImGui::BeginCombo(caption->c_str(), items->at(*current_item_index).c_str())) {
+	if (ImGui::BeginCombo(caption.c_str(), items->at(*current_item_index).c_str())) {
 		for (int n = 0; n < items->size(); n++) {
 			bool is_selected = (items->at(*current_item_index).c_str()) == items->at(n).c_str();
 			if (ImGui::Selectable(items->at(n).c_str(), is_selected)) {
