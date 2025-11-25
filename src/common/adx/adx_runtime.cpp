@@ -1,4 +1,18 @@
 #include <adx_runtime.h>
+ADXRuntime::Config::Config()
+{
+#if defined(XPT_TGT_PC)
+    criAtomEx_SetDefaultConfig_WASAPI(&this->specific_config);
+#elif defined(XPT_TGT_MACOSX)
+    criAtomEx_SetDefaultConfig_MACOSX(&this->specific_config);
+#endif
+    criAtomExMonitor_SetDefaultConfig(&this->monitor_config);
+    memset(&this->acf_info, 0, sizeof(CriAtomExAcfRegistrationInfo));
+    criAtomDbas_SetDefaultConfig(&dbas_config);
+    dbas_config.max_bps *= 2;
+    dbas_config.max_streams *= 2;
+    dbas_config.max_streams *= 2;
+}
 
 void ADXRuntime::Initialize(const ADXRuntime::Config& config)
 {
@@ -8,6 +22,7 @@ void ADXRuntime::Initialize(const ADXRuntime::Config& config)
     criAtomEx_Initialize_MACOSX(&config.specific_config, NULL, 0);
 #endif
     criAtomExMonitor_Initialize(&config.monitor_config, NULL, 0);
+    ADXRuntime::dbas_id = criAtomExDbas_Create(&config.dbas_config, NULL, 0);
 }
 
 bool ADXRuntime::IsInitilaized(void)
@@ -25,13 +40,54 @@ void ADXRuntime::Finalize(void)
 {
     ADXRuntime::vp.DestroyAllVoicePool();
     ADXRuntime::player.DestroyAllPlayer();
-
+    ADXRuntime::UnloadFile();
+    
+    criAtomExDbas_Destroy(ADXRuntime::dbas_id);
     criAtomExMonitor_Finalize();
 #if defined(XPT_TGT_PC)
 	criAtomEx_Finalize_WASAPI();
 #elif defined(XPT_TGT_MACOSX)
 	criAtomEx_Finalize_MACOSX();
 #endif
+}
+
+void ADXRuntime::LoadFile(const char* acb_file, const char* awb_file)
+{
+    CriAtomExAcbHn acb_hn = NULL;
+    
+    if (strlen(acb_file) > 0 && strlen(awb_file) > 0) {
+        acb_hn = criAtomExAcb_LoadAcbFile(
+            NULL, acb_file, NULL, awb_file, NULL, 0);
+    } else if (strlen(acb_file) > 0) {
+        acb_hn = criAtomExAcb_LoadAcbFile(
+            NULL, acb_file, NULL, NULL, NULL, 0);
+    }
+    
+    if (strlen(acb_file) > 0) {
+        assert(acb_hn != NULL);
+    }
+    
+    ADXRuntime::acb_hn = acb_hn;
+}
+
+void ADXRuntime::UnloadFile(void)
+{
+    if (ADXRuntime::acb_hn != NULL) {
+        criAtomExAcb_Release(ADXRuntime::acb_hn);
+    }
+}
+
+std::tuple<bool, CriAtomExAcfInfo> ADXRuntime::GetAcfInfo(void)
+{
+    CriAtomExAcfInfo acf_info;
+    bool result;
+    
+    if (criAtomExAcf_GetAcfInfo(&acf_info) == CRI_FALSE) {
+        result = false;
+    } else {
+        result = true;
+    }
+    return std::make_tuple(result, acf_info);
 }
 
 std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_type)
@@ -157,15 +213,4 @@ CriAtomExPlayerHn Player::GetPlayerHn(const int32_t& player_index)
     assert(player != NULL);
 
     return player;
-}
-
-ADXRuntime::Config::Config()
-{
-#if defined(XPT_TGT_PC)
-    criAtomEx_SetDefaultConfig_WASAPI(&this->specific_config);
-#elif defined(XPT_TGT_MACOSX)
-    criAtomEx_SetDefaultConfig_MACOSX(&this->specific_config);
-#endif
-    criAtomExMonitor_SetDefaultConfig(&this->monitor_config); 
-    memset(&this->acf_info, 0, sizeof(CriAtomExAcfRegistrationInfo));
 }

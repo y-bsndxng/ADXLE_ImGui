@@ -121,6 +121,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 
         ADXRuntime::vp.CreateVoicePool(voicepool_config);
 		ADXRuntime::player.CreatePlayer(player_config);
+        ADXRuntime::LoadFile(acb_file, awb_file);
 	}
 
 	ImGui::End();
