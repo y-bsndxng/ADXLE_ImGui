@@ -77,6 +77,19 @@ void ADXRuntime::UnloadFile(void)
     }
 }
 
+std::tuple<bool, CriAtomExAcfInfo> ADXRuntime::GetAcfInfo(void)
+{
+    CriAtomExAcfInfo acf_info;
+    bool result;
+    
+    if (criAtomExAcf_GetAcfInfo(&acf_info) == CRI_FALSE) {
+        result = false;
+    } else {
+        result = true;
+    }
+    return std::make_tuple(result, acf_info);
+}
+
 std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_type)
 {
 	CriSint32 num_used_voices = 0;

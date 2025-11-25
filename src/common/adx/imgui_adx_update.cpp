@@ -3,11 +3,13 @@
 #include <adx_runtime.h>
 
 static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
+static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 
 void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 {
 	static bool is_open_voicepool_window = false;
+    static bool is_open_info_window = false;
 	static bool is_open_player_window = false;
 
 	/* 未初期化なら何もしない */
@@ -21,6 +23,20 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 	ImGui::Begin("Update", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
 	ImGui::Text("Error : %s", ADXUtils::GetErrorMessage().c_str());
+    if (ImGui::TreeNode("Info")) {
+        if (ImGui::Button("Open")) {
+            is_open_info_window = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Close")) {
+            is_open_info_window = false;
+        }
+        if (is_open_info_window) {
+            ImVec2 info_window_size { size.x + 200.0f, size.y };
+            InfoWindow(info_window_size, ImGuiUtils::AddOffsetX(pos, 200.0f), &is_open_info_window);
+        }
+        ImGui::TreePop();
+    }
 	if (ImGui::TreeNode("VoicePool")) {
 		if (ImGui::Button("Open")) {
 			is_open_voicepool_window = true;
@@ -49,7 +65,6 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 		}
 		ImGui::TreePop();
 	}
-
 	ImGui::End();
 }
 
@@ -101,6 +116,67 @@ static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     }
 
 	ImGui::End();
+}
+
+static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
+{
+    ImGui::SetNextWindowPos(ImGuiUtils::AddOffsetX(pos, 300.0f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+    ImGui::Begin("Info", is_open, ImGuiWindowFlags_NoSavedSettings);
+    
+    auto [result, acf_info] = ADXRuntime::GetAcfInfo();
+    
+    ImGui::SeparatorText("ACF Info");
+    if (result) {
+        if (ImGui::BeginTable("ACF Info Table", 2)) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Name");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", acf_info.name);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Size");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.size);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Version");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.version);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of DSP Settings");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_dsp_settings);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Categories");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_categories);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Categories / Playback");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_categories_per_playback);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Reacts");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_reacts);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of AISAC Controls");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_aisac_controls);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Global AISAC Controls");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_global_aisacs);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Game Variables");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_game_variables);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Num Buses");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_buses);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Max Buses of DSP Bus Settings");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.max_buses_of_dsp_bus_settings);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Voice Limit Groups");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_voice_limit_groups);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of OutputPorts");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_output_ports);
+            ImGui::TableNextRow();
+            ImGui::EndTable();
+        }
+    }
+    
+    ImGui::End();
 }
 
 static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)

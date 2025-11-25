@@ -143,9 +143,9 @@
 			children = (
 				130BBBB62ECC9D6F00A5475A /* imgui_adx_finalize.cpp */,
 				130BBBB72ECC9D6F00A5475A /* imgui_adx_update.cpp */,
+				139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */,
 				139970512EC9A7A200B35EC9 /* adx_runtime.cpp */,
 				139970522EC9A7A200B35EC9 /* adx_utils.cpp */,
-				139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */,
 			);
 			path = adx;
 			sourceTree = "<group>";
