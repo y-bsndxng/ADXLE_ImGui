@@ -74,20 +74,60 @@ void ADXRuntime::UnloadFile(void)
 {
     if (ADXRuntime::acb_hn != NULL) {
         criAtomExAcb_Release(ADXRuntime::acb_hn);
+        ADXRuntime::acb_hn = NULL;
     }
 }
 
 std::tuple<bool, CriAtomExAcfInfo> ADXRuntime::GetAcfInfo(void)
 {
-    CriAtomExAcfInfo acf_info;
+    CriAtomExAcfInfo info;
     bool result;
     
-    if (criAtomExAcf_GetAcfInfo(&acf_info) == CRI_FALSE) {
+    if (criAtomExAcf_GetAcfInfo(&info) == CRI_FALSE) {
         result = false;
     } else {
         result = true;
     }
-    return std::make_tuple(result, acf_info);
+    return std::make_tuple(result, info);
+}
+
+std::tuple<bool, CriAtomExAcbInfo> ADXRuntime::GetAcbInfo(void)
+{
+    CriAtomExAcbInfo info;
+    bool result;
+    
+    if (criAtomExAcb_GetAcbInfo(ADXRuntime::acb_hn, &info) == CRI_FALSE) {
+        result = false;
+    } else {
+        result = true;
+    }
+    return std::make_tuple(result, info);
+}
+
+std::tuple<bool, CriAtomExCueInfo> ADXRuntime::GetCueInfo(const char* name)
+{
+    CriAtomExCueInfo info;
+    bool result;
+    
+    if (criAtomExAcb_GetCueInfoByName(ADXRuntime::acb_hn, name, &info) == CRI_FALSE) {
+        result = false;
+    } else {
+        result = true;
+    }
+    return std::make_tuple(result, info);
+}
+
+std::vector<std::string> ADXRuntime::GetCueNames(void)
+{
+    auto [result, acb_info] = ADXRuntime::GetAcbInfo();
+    std::vector<std::string> cue_names;
+    
+    cue_names.resize(acb_info.num_cues);
+    for (int32_t i = 0; i < acb_info.num_cues; i++) {
+        cue_names.at(i) = criAtomExAcb_GetCueNameByIndex(acb_hn, i);
+    }
+    
+    return cue_names;
 }
 
 std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_type)

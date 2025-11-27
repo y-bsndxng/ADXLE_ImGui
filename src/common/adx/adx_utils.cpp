@@ -34,7 +34,7 @@ void ADXUtils::UserFreeFunc(void* obj, void* ptr)
 	free(ptr);
 }
 
-std::string ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
+const char* ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
 {
 	switch (voice_type) {
 	case VoiceType::Standard:
@@ -48,7 +48,7 @@ std::string ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
 	}
 }
 
-std::string ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
+const char* ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
 {
     auto status = criAtomExPlayer_GetStatus(player);
 
@@ -63,6 +63,20 @@ std::string ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
         return "PLAYING";
     case CRIATOMEXPLAYER_STATUS_ERROR:
         return "ERROR";
+    default:
+        return "UNKNOWN";
+    }
+}
+
+const char* ADXUtils::GetPanTypeString(const CriAtomExPanType pan_type)
+{
+    switch (pan_type) {
+    case CRIATOMEX_PAN_TYPE_PAN3D:
+        return "PAN3D";
+    case CRIATOMEX_PAN_TYPE_3D_POS:
+        return "3D_POS";
+    case CRIATOMEX_PAN_TYPE_AUTO:
+        return "AUTO";
     default:
         return "UNKNOWN";
     }

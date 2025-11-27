@@ -33,7 +33,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
         }
         if (is_open_info_window) {
             ImVec2 info_window_size { size.x + 200.0f, size.y };
-            InfoWindow(info_window_size, ImGuiUtils::AddOffsetX(pos, 200.0f), &is_open_info_window);
+            InfoWindow(info_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_info_window);
         }
         ImGui::TreePop();
     }
@@ -47,7 +47,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 		}
 		if (is_open_voicepool_window) {
             auto vp_window_size = ImGuiUtils::AddOffset(size, 100.0f);
-			VoicePoolWindow(vp_window_size, ImGuiUtils::AddOffsetX(pos, 300.0f), &is_open_voicepool_window);
+			VoicePoolWindow(vp_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_voicepool_window);
 		}
 		ImGui::TreePop();
 	}
@@ -61,17 +61,137 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 		}
 		if (is_open_player_window) {
             ImVec2 player_window_size { size.x + 200.0f, size.y };
-			PlayerWindow(player_window_size, ImGuiUtils::AddOffsetX(pos, 200.0f), &is_open_player_window);
+			PlayerWindow(player_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_player_window);
 		}
 		ImGui::TreePop();
 	}
 	ImGui::End();
 }
 
+static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
+{
+    static int32_t selected_cue_index = 0;
+    auto cue_names = ADXRuntime::GetCueNames();
+    ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+    ImGui::Begin("Info", is_open, ImGuiWindowFlags_NoSavedSettings);
+    
+    ImGui::SeparatorText("ACF Info");
+    if (auto [result, info] = ADXRuntime::GetAcfInfo(); result) {
+        if (ImGui::BeginTable("ACF Info Table", 2)) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Name");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", info.name);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Size");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.size);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Version");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.version);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of DSP Settings");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_dsp_settings);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Categories");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_categories);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Categories / Playback");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_categories_per_playback);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Reacts");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_reacts);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of AISAC Controls");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_aisac_controls);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Global AISAC Controls");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_global_aisacs);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Game Variables");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_game_variables);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Num Buses");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_buses);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Max Buses of DSP Bus Settings");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.max_buses_of_dsp_bus_settings);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Voice Limit Groups");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_voice_limit_groups);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of OutputPorts");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_output_ports);
+            ImGui::TableNextRow();
+            ImGui::EndTable();
+        }
+    }
+
+    ImGui::SeparatorText("ACB Info");
+    if (auto [result, info] = ADXRuntime::GetAcbInfo(); result) {
+        if (ImGui::BeginTable("ACB Info Table", 2)) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Name");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", info.name);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Version");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.version);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Encoding of Char");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.character_encoding);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Volume");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", info.volume);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Cues");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.num_cues);
+            ImGui::TableNextRow();
+            ImGui::EndTable();
+        }
+    }
+    
+    ImGui::SeparatorText("Cue Info");
+    if (!cue_names.empty()) {
+        ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
+        if (auto [result, info] = ADXRuntime::GetCueInfo(cue_names.at(selected_cue_index).c_str()); result) {
+            if (ImGui::BeginTable("Cue Info Table", 2)) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "ID");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.id);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "name");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%s", info.name);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Type");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%d", info.type);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Volume");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", info.volume);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Length");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%lld", info.length);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "PanType");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%s", ADXUtils::GetPanTypeString(info.pan_type));
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Min Distance");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", info.pos3d_info.min_distance);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Max Distance");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", info.pos3d_info.max_distance);
+                ImGui::TableNextRow();
+                ImGui::EndTable();
+            }
+        }
+    }
+
+    
+    ImGui::End();
+}
+
 static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
     ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_NoHostExtendX;
-	ImGui::SetNextWindowPos(ImGuiUtils::AddOffsetX(pos, 300.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("VoicePool", is_open, ImGuiWindowFlags_NoSavedSettings);
 	std::vector<std::string> names;
@@ -118,85 +238,27 @@ static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	ImGui::End();
 }
 
-static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
-{
-    ImGui::SetNextWindowPos(ImGuiUtils::AddOffsetX(pos, 300.0f), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
-    ImGui::Begin("Info", is_open, ImGuiWindowFlags_NoSavedSettings);
-    
-    auto [result, acf_info] = ADXRuntime::GetAcfInfo();
-    
-    ImGui::SeparatorText("ACF Info");
-    if (result) {
-        if (ImGui::BeginTable("ACF Info Table", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Name");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", acf_info.name);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Size");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.size);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Version");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.version);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of DSP Settings");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_dsp_settings);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Categories");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_categories);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Categories / Playback");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_categories_per_playback);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Reacts");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_reacts);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of AISAC Controls");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_aisac_controls);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Global AISAC Controls");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_global_aisacs);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Game Variables");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_game_variables);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Num Buses");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_buses);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Max Buses of DSP Bus Settings");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.max_buses_of_dsp_bus_settings);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Voice Limit Groups");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_voice_limit_groups);
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of OutputPorts");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", acf_info.num_output_ports);
-            ImGui::TableNextRow();
-            ImGui::EndTable();
-        }
-    }
-    
-    ImGui::End();
-}
-
 static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
-	ImGui::SetNextWindowPos(ImGuiUtils::AddOffsetX(pos, 300.0f), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
-	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
-	static int32_t selected_index = 0;
-	std::vector<std::string> names;
-	CriAtomExPlayerHn player;
+    static int32_t selected_cue_index = 0;
+    static int32_t selected_player_index = 0;
     static bool is_auto_update = false;
     static bool is_loop = false;
+    auto cue_names = ADXRuntime::GetCueNames();
+    std::vector<std::string> player_names;
+    CriAtomExPlayerHn player;
+	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
 
-	names.resize(ADXRuntime::player.num_players);
+
+    player_names.resize(ADXRuntime::player.num_players);
 	for (int32_t i = 0; i < ADXRuntime::player.num_players; i++) {
-		names.at(i) = "PlayerIndex : " + std::to_string(i);
+        player_names.at(i) = "PlayerIndex : " + std::to_string(i);
 	}
-	ImGuiUtils::Comboui("Player", &selected_index, &names);
+	ImGuiUtils::Comboui("Player", &selected_player_index, &player_names);
 
-	player = ADXRuntime::player.GetPlayerHn(selected_index);
+	player = ADXRuntime::player.GetPlayerHn(selected_player_index);
     
     ImGui::Separator();
 	if (ImGui::BeginTable("Table##player", 2)) {
@@ -205,7 +267,7 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 		ImGui::TableSetColumnIndex(1); ImGui::Text("%p", player);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Player Status");
-		ImGui::TableSetColumnIndex(1); ImGui::Text("%s", ADXUtils::GetPlayerStatusString(player).c_str());
+		ImGui::TableSetColumnIndex(1); ImGui::Text("%s", ADXUtils::GetPlayerStatusString(player));
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Player Samples");
 		ImGui::TableSetColumnIndex(1); ImGui::Text("%lld", criAtomExPlayer_GetTimeReal(player));
@@ -216,10 +278,14 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 		ImGui::EndTable();
 	}
     
+    if (!cue_names.empty()) {
+        ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
+    }
     ImGui::Separator();
     if (ImGui::Button("Start")) {
-        auto playback_id = criAtomExPlayer_Start(player);
-        ADXRuntime::playback_ids.push_back(playback_id);
+        auto name = cue_names.at(selected_cue_index).c_str();
+        criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, name);
+        ADXRuntime::playback_ids.push_back(criAtomExPlayer_Start(player));
     }
     ImGui::SameLine();
     if (ImGui::Button("Stop")) {

@@ -92,6 +92,9 @@ namespace ADXRuntime {
     void LoadFile(const char* acb_file, const char* awb_file);
     void UnloadFile(void);
     std::tuple<bool, CriAtomExAcfInfo> GetAcfInfo(void);
+    std::tuple<bool, CriAtomExAcbInfo> GetAcbInfo(void);
+    std::tuple<bool, CriAtomExCueInfo> GetCueInfo(const char* name);
+    std::vector<std::string> GetCueNames(void);
 	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
 
 	/* Runtime Object */

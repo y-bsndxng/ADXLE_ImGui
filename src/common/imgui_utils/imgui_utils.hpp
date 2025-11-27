@@ -13,6 +13,7 @@ namespace ImGuiUtils {
 	inline ImVec2 AddOffsetX(const ImVec2& v, float offset);
 	inline ImVec2 AddOffsetY(const ImVec2& v, float offset);
 	inline ImVec2 AddOffset(const ImVec2& v, float offset);
+    std::string GetCurrentDirectory();
 }
 
 inline bool ImGuiUtils::Comboui(const std::string& caption, int32_t* current_item_index, const std::vector<std::string>* items)
