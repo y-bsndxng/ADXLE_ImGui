@@ -40,6 +40,7 @@ void ADXRuntime::Finalize(void)
 {
     ADXRuntime::vp.DestroyAllVoicePool();
     ADXRuntime::player.DestroyAllPlayer();
+    ADXRuntime::playback_ids.clear();
     ADXRuntime::UnloadFile();
     
     criAtomExDbas_Destroy(ADXRuntime::dbas_id);
@@ -53,21 +54,21 @@ void ADXRuntime::Finalize(void)
 
 void ADXRuntime::LoadFile(const char* acb_file, const char* awb_file)
 {
-    CriAtomExAcbHn acb_hn = NULL;
+    CriAtomExAcbHn acb_hn_ = NULL;
     
     if (strlen(acb_file) > 0 && strlen(awb_file) > 0) {
-        acb_hn = criAtomExAcb_LoadAcbFile(
+        acb_hn_ = criAtomExAcb_LoadAcbFile(
             NULL, acb_file, NULL, awb_file, NULL, 0);
     } else if (strlen(acb_file) > 0) {
-        acb_hn = criAtomExAcb_LoadAcbFile(
+        acb_hn_ = criAtomExAcb_LoadAcbFile(
             NULL, acb_file, NULL, NULL, NULL, 0);
     }
     
     if (strlen(acb_file) > 0) {
-        assert(acb_hn != NULL);
+        assert(acb_hn_ != NULL);
     }
     
-    ADXRuntime::acb_hn = acb_hn;
+    ADXRuntime::acb_hn = acb_hn_;
 }
 
 void ADXRuntime::UnloadFile(void)

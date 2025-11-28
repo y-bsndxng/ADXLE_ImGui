@@ -32,8 +32,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
             is_open_info_window = false;
         }
         if (is_open_info_window) {
-            ImVec2 info_window_size { size.x + 200.0f, size.y };
-            InfoWindow(info_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_info_window);
+            ImVec2 window_size{ size.x + 200.0f, size.y };
+            InfoWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_info_window);
         }
         ImGui::TreePop();
     }
@@ -46,8 +46,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_voicepool_window = false;
 		}
 		if (is_open_voicepool_window) {
-            auto vp_window_size = ImGuiUtils::AddOffset(size, 100.0f);
-			VoicePoolWindow(vp_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_voicepool_window);
+            auto window_size = ImGuiUtils::AddOffset(size, 100.0f);
+			VoicePoolWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_voicepool_window);
 		}
 		ImGui::TreePop();
 	}
@@ -60,8 +60,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_player_window = false;
 		}
 		if (is_open_player_window) {
-            ImVec2 player_window_size { size.x + 200.0f, size.y };
-			PlayerWindow(player_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_player_window);
+            ImVec2 window_size{ size.x + 200.0f, size.y };
+			PlayerWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_player_window);
 		}
 		ImGui::TreePop();
 	}
@@ -240,6 +240,7 @@ static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
 static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
+    ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_NoHostExtendX;
     static int32_t selected_cue_index = 0;
     static int32_t selected_player_index = 0;
     static bool is_auto_update = false;
@@ -250,7 +251,6 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
-
 
     player_names.resize(ADXRuntime::player.num_players);
 	for (int32_t i = 0; i < ADXRuntime::player.num_players; i++) {
@@ -380,6 +380,64 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         criAtomExPlayer_SetAisacControlById(player, aisac_cointrol_id, aisac_control_value);
         ImGui::TreePop();
     }
+    ImGui::Separator();
+    if (ImGui::TreeNode("Playback")) {
+        if (ImGui::BeginTable("PlaybackTable", 4, flags)) {
+            ImGui::TableSetupColumn("Playback ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("Played Samples", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("Playback Status", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("Player Ptr", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableHeadersRow();
+
+            /* Playback Status の表示 */
+            if (ADXRuntime::playback_ids.empty() == false) {
+                for (auto playback_id_ptr = ADXRuntime::playback_ids.begin(); playback_id_ptr != ADXRuntime::playback_ids.end(); playback_id_ptr++) {
+                    int32_t column = 0;
+                    CriSint32 sampling_rate = 0;
+                    CriSint64 played_samples = 0;
+                    CriAtomExPlaybackStatus playback_status;
+                    char buffer[256] = "";
+                    const char* playback_status_name = "";
+                    playback_status = criAtomExPlayback_GetStatus(*playback_id_ptr);
+                    criAtomExPlayback_GetNumPlayedSamples(*playback_id_ptr, &played_samples, &sampling_rate);
+
+                    switch (playback_status) {
+                    case CRIATOMEXPLAYBACK_STATUS_PREP:
+                        playback_status_name = "PREP";
+                        break;
+                    case CRIATOMEXPLAYBACK_STATUS_PLAYING:
+                        playback_status_name = "PLAYING";
+                        break;
+                    case CRIATOMEXPLAYBACK_STATUS_REMOVED:
+                        playback_status_name = "REMOVED";
+                        break;
+                    default:
+                        playback_status_name = "UNKNOWN";
+                        break;
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(column);
+                    snprintf(buffer, sizeof(buffer), "%d", *playback_id_ptr);
+                    ImGuiUtils::Rightalign(buffer);
+                    column++;
+                    ImGui::TableSetColumnIndex(column);
+                    snprintf(buffer, sizeof(buffer), "%lld", played_samples);
+                    ImGuiUtils::Rightalign(buffer);
+                    column++;
+                    ImGui::TableSetColumnIndex(column);
+                    ImGuiUtils::Rightalign(playback_status_name);
+                    column++;
+                    ImGui::TableSetColumnIndex(column);
+                    snprintf(buffer, sizeof(buffer), "%p", criAtomExPlayback_GetAtomPlayer(*playback_id_ptr));
+                    ImGuiUtils::Rightalign(buffer);
+                }
+            }
+            ImGui::EndTable();
+        }
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
     
 	ImGui::End();
 }

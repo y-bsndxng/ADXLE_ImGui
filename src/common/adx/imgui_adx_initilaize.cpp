@@ -26,7 +26,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SameLine();
 	if (ImGui::Button("Open##ACF")) {
 		IGFD::FileDialogConfig config;
-        config.path = ImGuiUtils::GetCurrentDirectory();
+        config.path = ImGuiUtils::GetCurrentPath();
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseACFFileDlgKey", "Choose File", ".acf", config);
 	}
@@ -40,7 +40,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SameLine();
 	if (ImGui::Button("Open##ACB")) {
 		IGFD::FileDialogConfig config;
-		config.path = ImGuiUtils::GetCurrentDirectory();
+		config.path = ImGuiUtils::GetCurrentPath();
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseACBFileDlgKey", "Choose File", ".acb", config);
 	}
@@ -54,7 +54,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SameLine();
 	if (ImGui::Button("Open##AWB")) {
 		IGFD::FileDialogConfig config;
-		config.path = ImGuiUtils::GetCurrentDirectory();
+		config.path = ImGuiUtils::GetCurrentPath();
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseAWBFileDlgKey", "Choose File", ".awb", config);
 	}
