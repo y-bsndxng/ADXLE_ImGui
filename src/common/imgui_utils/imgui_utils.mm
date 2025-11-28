@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #include <imgui_utils.hpp>
 
-std::string ImGuiUtils::GetCurrentDirectory()
+std::string ImGuiUtils::GetCurrentPath()
 {
     @autoreleasepool {
         NSString *projectDir = PROJECT_DIR_PATH;
