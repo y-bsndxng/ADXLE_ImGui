@@ -93,6 +93,16 @@ namespace ADXRuntime {
     std::tuple<bool, CriAtomExCueInfo> GetCueInfo(const char* name);
     std::vector<std::string> GetCueNames(void);
 	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
+    CriAtomSpeakerMapping GetSpeakerMapping(void);
+    CriAtomSpeakerMapping GetSpeakerMapping(const CriAtomExAsrRackId rack_id);
+    std::tuple<int32_t, int32_t> GetNumOutputSamples(void);
+    std::tuple<int32_t, int32_t> GetNumOutputSamples(const CriAtomExAsrRackId rack_id);
+    std::tuple<int32_t, int32_t> GetNumRenderedSamples(void);
+    std::tuple<int32_t, int32_t> GetNumRenderedSamples(const CriAtomExAsrRackId rack_id);
+    CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(void);
+    CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(const CriAtomExAsrRackId rack_id);
+    void ResetPerformanceInfo(void);
+    void ResetPerformanceInfo(const CriAtomExAsrRackId rack_id);
 
 	/* Runtime Object */
 	inline VoicePool vp;

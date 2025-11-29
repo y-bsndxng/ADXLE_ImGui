@@ -22,7 +22,13 @@ void ADXRuntime::Initialize(const ADXRuntime::Config& config)
     criAtomEx_Initialize_MACOSX(&config.specific_config, NULL, 0);
 #endif
     criAtomExMonitor_Initialize(&config.monitor_config, NULL, 0);
-    ADXRuntime::dbas_id = criAtomExDbas_Create(&config.dbas_config, NULL, 0);
+    
+    /* 初期化成功なら以下を実行 */
+    if (criAtomEx_IsInitialized() != CRI_FALSE) {
+        ADXRuntime::dbas_id = criAtomExDbas_Create(&config.dbas_config, NULL, 0);
+        criAtomEx_AttachPerformanceMonitor();
+        criAtomEx_ResetPerformanceMonitor();
+    }
 }
 
 bool ADXRuntime::IsInitilaized(void)
@@ -123,11 +129,13 @@ std::vector<std::string> ADXRuntime::GetCueNames(void)
     auto [result, acb_info] = ADXRuntime::GetAcbInfo();
     std::vector<std::string> cue_names;
     
-    cue_names.resize(acb_info.num_cues);
-    for (int32_t i = 0; i < acb_info.num_cues; i++) {
-        cue_names.at(i) = criAtomExAcb_GetCueNameByIndex(acb_hn, i);
+    if (result) {
+        cue_names.resize(acb_info.num_cues);
+        for (int32_t i = 0; i < acb_info.num_cues; i++) {
+            cue_names.at(i) = criAtomExAcb_GetCueNameByIndex(acb_hn, i);
+        }
     }
-    
+
     return cue_names;
 }
 
@@ -139,6 +147,68 @@ std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_ty
 	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::vp.GetVoicePoolHn(voice_type), &num_used_voices, &num_max_voices);
 
 	return std::make_tuple(num_used_voices, num_max_voices);
+}
+
+CriAtomSpeakerMapping ADXRuntime::GetSpeakerMapping(void)
+{
+    return ADXRuntime::GetSpeakerMapping(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+CriAtomSpeakerMapping ADXRuntime::GetSpeakerMapping(const CriAtomExAsrRackId rack_id)
+{
+    return criAtomExAsrRack_GetSpeakerMapping(rack_id);
+}
+
+std::tuple<int32_t, int32_t> ADXRuntime::GetNumOutputSamples(void)
+{
+    return ADXRuntime::GetNumOutputSamples(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+std::tuple<int32_t, int32_t> ADXRuntime::GetNumOutputSamples(const CriAtomExAsrRackId rack_id)
+{
+    CriSint64 num_samples;
+    CriSint32 num_sampling_rate;
+
+    criAtomExAsrRack_GetNumOutputSamples(rack_id, &num_samples, &num_sampling_rate);
+    
+    return std::make_tuple(num_samples, num_sampling_rate);
+}
+
+std::tuple<int32_t, int32_t> ADXRuntime::GetNumRenderedSamples(void)
+{
+    return ADXRuntime::GetNumRenderedSamples(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+std::tuple<int32_t, int32_t> ADXRuntime::GetNumRenderedSamples(const CriAtomExAsrRackId rack_id)
+{
+    CriSint64 num_samples;
+    CriSint32 num_sampling_rate;
+
+    criAtomExAsrRack_GetNumRenderedSamples(rack_id, &num_samples, &num_sampling_rate);
+    
+    return std::make_tuple(num_samples, num_sampling_rate);
+}
+
+CriAtomExAsrRackPerformanceInfo ADXRuntime::GetPerformanceInfo(void)
+{
+    return ADXRuntime::GetPerformanceInfo(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+CriAtomExAsrRackPerformanceInfo ADXRuntime::GetPerformanceInfo(const CriAtomExAsrRackId rack_id)
+{
+    CriAtomExAsrRackPerformanceInfo info;
+    criAtomExAsrRack_GetPerformanceInfo(rack_id, &info);
+    return info;
+}
+
+void ADXRuntime::ResetPerformanceInfo(void)
+{
+    ADXRuntime::ResetPerformanceInfo(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+void ADXRuntime::ResetPerformanceInfo(const CriAtomExAsrRackId rack_id)
+{
+    criAtomExAsrRack_ResetPerformanceMonitor(rack_id);
 }
 
 VoicePool::Config::Config()

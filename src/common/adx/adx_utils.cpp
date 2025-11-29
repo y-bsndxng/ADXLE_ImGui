@@ -81,3 +81,37 @@ const char* ADXUtils::GetPanTypeString(const CriAtomExPanType pan_type)
         return "UNKNOWN";
     }
 }
+
+const char* ADXUtils::GetSpeakerMappingString(const CriAtomSpeakerMapping speaker_mapping)
+{
+    switch (speaker_mapping) {
+    case CRIATOM_SPEAKER_MAPPING_AUTO:
+        return "AUTO";
+    case CRIATOM_SPEAKER_MAPPING_MONO:
+        return "MONO";
+    case CRIATOM_SPEAKER_MAPPING_STEREO:
+        return "STEREO";
+    case CRIATOM_SPEAKER_MAPPING_5_1:
+        return "5_1";
+    case CRIATOM_SPEAKER_MAPPING_7_1:
+        return "7_1";
+    case CRIATOM_SPEAKER_MAPPING_5_1_2:
+        return "5_1_2";
+    case CRIATOM_SPEAKER_MAPPING_7_1_2:
+        return "7_1_2";
+    case CRIATOM_SPEAKER_MAPPING_7_1_4:
+        return "7_1_4";
+    case CRIATOM_SPEAKER_MAPPING_7_1_4_4:
+        return "7_1_4_4";
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_1P:
+        return "AMBISONICS_1P";
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_2P:
+        return "AMBISONICS_2P";
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_3P:
+        return "AMBISONICS_3P";
+    case CRIATOM_SPEAKER_MAPPING_OBJECT:
+        return "OBJECT";
+    default:
+        return "UNKNOWN";
+    }
+}

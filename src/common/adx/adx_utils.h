@@ -16,4 +16,5 @@ namespace ADXUtils {
     const char* GetVoiceTypeString(const VoiceType voice_type);
     const char* GetPlayerStatusString(const CriAtomExPlayerHn player);
     const char* GetPanTypeString(const CriAtomExPanType pan_type);
+    const char* GetSpeakerMappingString(const CriAtomSpeakerMapping speaker_mapping);
 }
