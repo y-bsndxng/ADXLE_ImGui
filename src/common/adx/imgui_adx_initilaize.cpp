@@ -26,7 +26,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SameLine();
 	if (ImGui::Button("Open##ACF")) {
 		IGFD::FileDialogConfig config;
-		config.path = std::filesystem::current_path().string();
+        config.path = ImGuiUtils::GetCurrentPath();
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseACFFileDlgKey", "Choose File", ".acf", config);
 	}
@@ -40,7 +40,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SameLine();
 	if (ImGui::Button("Open##ACB")) {
 		IGFD::FileDialogConfig config;
-		config.path = std::filesystem::current_path().string();
+		config.path = ImGuiUtils::GetCurrentPath();
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseACBFileDlgKey", "Choose File", ".acb", config);
 	}
@@ -54,7 +54,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	ImGui::SameLine();
 	if (ImGui::Button("Open##AWB")) {
 		IGFD::FileDialogConfig config;
-		config.path = std::filesystem::current_path().string();
+		config.path = ImGuiUtils::GetCurrentPath();
 		ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
 		ImGuiFileDialog::Instance()->OpenDialog("ChooseAWBFileDlgKey", "Choose File", ".awb", config);
 	}
@@ -65,7 +65,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	}
 
 	ImGui::Separator();
-	ImGuiUtils::Comboui("ThreadModel", & selected_thread_model_index, & thread_models_items);
+	ImGuiUtils::Comboui("ThreadModel", &selected_thread_model_index, &thread_models_items);
 	ImGui::SliderInt("Number of Sampling Rate", &num_sampling_rate, 0, 192000);
 	ImGui::SliderInt("Number of Voice", &num_voice, 1, 256);
 	ImGui::SliderInt("Number of Virtual Voice", &num_virtual_voice, 1, 256);
@@ -112,8 +112,8 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
         voicepool_config.wave_config.player_config.max_sampling_rate = num_sampling_rate;
 
         voicepool_config.standard_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-        voicepool_config.rawpcm_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-        voicepool_config.wave_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.rawpcm_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.wave_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
 
         voicepool_config.standard_config.player_config.streaming_flag = CRI_TRUE;
 

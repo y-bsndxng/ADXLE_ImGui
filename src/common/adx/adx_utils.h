@@ -13,6 +13,8 @@ namespace ADXUtils {
 	std::string GetErrorMessage(void);
 	void* UserAllocFunc(void* obj, CriUint32 size);
 	void UserFreeFunc(void* obj, void* ptr);
-	std::string GetVoiceTypeString(const VoiceType voice_type);
-	std::string GetPlayerStatusString(const CriAtomExPlayerHn player);
+    const char* GetVoiceTypeString(const VoiceType voice_type);
+    const char* GetPlayerStatusString(const CriAtomExPlayerHn player);
+    const char* GetPanTypeString(const CriAtomExPanType pan_type);
+    const char* GetSpeakerMappingString(const CriAtomSpeakerMapping speaker_mapping);
 }

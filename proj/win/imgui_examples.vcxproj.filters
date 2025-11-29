@@ -93,6 +93,9 @@
     <ClCompile Include="..\..\src\common\adx\imgui_adx_update.cpp">
       <Filter>common\adx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp">
+      <Filter>common\imgui_utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\external\imgui\LICENSE.txt">

@@ -11,6 +11,7 @@ void ADXUtils::UserErrorCallBackFunc(const CriChar8* errid, CriUint32 p1, CriUin
 	/* エラー文字列の表示 */
 	errmsg = criErr_ConvertIdToMessage(errid, p1, p2);
 	error_message = std::string(errmsg);
+    printf("%s\n", errmsg);
 
 	return;
 }
@@ -34,7 +35,7 @@ void ADXUtils::UserFreeFunc(void* obj, void* ptr)
 	free(ptr);
 }
 
-std::string ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
+const char* ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
 {
 	switch (voice_type) {
 	case VoiceType::Standard:
@@ -48,7 +49,7 @@ std::string ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
 	}
 }
 
-std::string ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
+const char* ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
 {
     auto status = criAtomExPlayer_GetStatus(player);
 
@@ -63,6 +64,54 @@ std::string ADXUtils::GetPlayerStatusString(const CriAtomExPlayerHn player)
         return "PLAYING";
     case CRIATOMEXPLAYER_STATUS_ERROR:
         return "ERROR";
+    default:
+        return "UNKNOWN";
+    }
+}
+
+const char* ADXUtils::GetPanTypeString(const CriAtomExPanType pan_type)
+{
+    switch (pan_type) {
+    case CRIATOMEX_PAN_TYPE_PAN3D:
+        return "PAN3D";
+    case CRIATOMEX_PAN_TYPE_3D_POS:
+        return "3D_POS";
+    case CRIATOMEX_PAN_TYPE_AUTO:
+        return "AUTO";
+    default:
+        return "UNKNOWN";
+    }
+}
+
+const char* ADXUtils::GetSpeakerMappingString(const CriAtomSpeakerMapping speaker_mapping)
+{
+    switch (speaker_mapping) {
+    case CRIATOM_SPEAKER_MAPPING_AUTO:
+        return "AUTO";
+    case CRIATOM_SPEAKER_MAPPING_MONO:
+        return "MONO";
+    case CRIATOM_SPEAKER_MAPPING_STEREO:
+        return "STEREO";
+    case CRIATOM_SPEAKER_MAPPING_5_1:
+        return "5_1";
+    case CRIATOM_SPEAKER_MAPPING_7_1:
+        return "7_1";
+    case CRIATOM_SPEAKER_MAPPING_5_1_2:
+        return "5_1_2";
+    case CRIATOM_SPEAKER_MAPPING_7_1_2:
+        return "7_1_2";
+    case CRIATOM_SPEAKER_MAPPING_7_1_4:
+        return "7_1_4";
+    case CRIATOM_SPEAKER_MAPPING_7_1_4_4:
+        return "7_1_4_4";
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_1P:
+        return "AMBISONICS_1P";
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_2P:
+        return "AMBISONICS_2P";
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_3P:
+        return "AMBISONICS_3P";
+    case CRIATOM_SPEAKER_MAPPING_OBJECT:
+        return "OBJECT";
     default:
         return "UNKNOWN";
     }

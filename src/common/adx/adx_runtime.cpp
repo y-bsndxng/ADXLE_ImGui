@@ -22,7 +22,13 @@ void ADXRuntime::Initialize(const ADXRuntime::Config& config)
     criAtomEx_Initialize_MACOSX(&config.specific_config, NULL, 0);
 #endif
     criAtomExMonitor_Initialize(&config.monitor_config, NULL, 0);
-    ADXRuntime::dbas_id = criAtomExDbas_Create(&config.dbas_config, NULL, 0);
+    
+    /* 初期化成功なら以下を実行 */
+    if (criAtomEx_IsInitialized() != CRI_FALSE) {
+        ADXRuntime::dbas_id = criAtomExDbas_Create(&config.dbas_config, NULL, 0);
+        criAtomEx_AttachPerformanceMonitor();
+        criAtomEx_ResetPerformanceMonitor();
+    }
 }
 
 bool ADXRuntime::IsInitilaized(void)
@@ -40,6 +46,7 @@ void ADXRuntime::Finalize(void)
 {
     ADXRuntime::vp.DestroyAllVoicePool();
     ADXRuntime::player.DestroyAllPlayer();
+    ADXRuntime::playback_ids.clear();
     ADXRuntime::UnloadFile();
     
     criAtomExDbas_Destroy(ADXRuntime::dbas_id);
@@ -53,41 +60,87 @@ void ADXRuntime::Finalize(void)
 
 void ADXRuntime::LoadFile(const char* acb_file, const char* awb_file)
 {
-    CriAtomExAcbHn acb_hn = NULL;
+    CriAtomExAcbHn acb_hn_ = NULL;
     
     if (strlen(acb_file) > 0 && strlen(awb_file) > 0) {
-        acb_hn = criAtomExAcb_LoadAcbFile(
+        acb_hn_ = criAtomExAcb_LoadAcbFile(
             NULL, acb_file, NULL, awb_file, NULL, 0);
     } else if (strlen(acb_file) > 0) {
-        acb_hn = criAtomExAcb_LoadAcbFile(
+        acb_hn_ = criAtomExAcb_LoadAcbFile(
             NULL, acb_file, NULL, NULL, NULL, 0);
     }
     
     if (strlen(acb_file) > 0) {
-        assert(acb_hn != NULL);
+        assert(acb_hn_ != NULL);
     }
     
-    ADXRuntime::acb_hn = acb_hn;
+    ADXRuntime::acb_hn = acb_hn_;
 }
 
 void ADXRuntime::UnloadFile(void)
 {
     if (ADXRuntime::acb_hn != NULL) {
         criAtomExAcb_Release(ADXRuntime::acb_hn);
+        ADXRuntime::acb_hn = NULL;
     }
 }
 
 std::tuple<bool, CriAtomExAcfInfo> ADXRuntime::GetAcfInfo(void)
 {
-    CriAtomExAcfInfo acf_info;
+    CriAtomExAcfInfo info;
     bool result;
     
-    if (criAtomExAcf_GetAcfInfo(&acf_info) == CRI_FALSE) {
+    if (criAtomExAcf_GetAcfInfo(&info) == CRI_FALSE) {
         result = false;
     } else {
         result = true;
     }
-    return std::make_tuple(result, acf_info);
+    return std::make_tuple(result, info);
+}
+
+std::tuple<bool, CriAtomExAcbInfo> ADXRuntime::GetAcbInfo(void)
+{
+    CriAtomExAcbInfo info { 0 };
+    bool result = false;
+
+    if (ADXRuntime::acb_hn == NULL) {
+        return std::make_tuple(result, info);
+    }
+    
+    if (criAtomExAcb_GetAcbInfo(ADXRuntime::acb_hn, &info) == CRI_FALSE) {
+        result = false;
+    } else {
+        result = true;
+    }
+    return std::make_tuple(result, info);
+}
+
+std::tuple<bool, CriAtomExCueInfo> ADXRuntime::GetCueInfo(const char* name)
+{
+    CriAtomExCueInfo info;
+    bool result;
+    
+    if (criAtomExAcb_GetCueInfoByName(ADXRuntime::acb_hn, name, &info) == CRI_FALSE) {
+        result = false;
+    } else {
+        result = true;
+    }
+    return std::make_tuple(result, info);
+}
+
+std::vector<std::string> ADXRuntime::GetCueNames(void)
+{
+    auto [result, acb_info] = ADXRuntime::GetAcbInfo();
+    std::vector<std::string> cue_names;
+    
+    if (result) {
+        cue_names.resize(acb_info.num_cues);
+        for (int32_t i = 0; i < acb_info.num_cues; i++) {
+            cue_names.at(i) = criAtomExAcb_GetCueNameByIndex(acb_hn, i);
+        }
+    }
+
+    return cue_names;
 }
 
 std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_type)
@@ -98,6 +151,68 @@ std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_ty
 	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::vp.GetVoicePoolHn(voice_type), &num_used_voices, &num_max_voices);
 
 	return std::make_tuple(num_used_voices, num_max_voices);
+}
+
+CriAtomSpeakerMapping ADXRuntime::GetSpeakerMapping(void)
+{
+    return ADXRuntime::GetSpeakerMapping(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+CriAtomSpeakerMapping ADXRuntime::GetSpeakerMapping(const CriAtomExAsrRackId rack_id)
+{
+    return criAtomExAsrRack_GetSpeakerMapping(rack_id);
+}
+
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumOutputSamples(void)
+{
+    return ADXRuntime::GetNumOutputSamples(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumOutputSamples(const CriAtomExAsrRackId rack_id)
+{
+    CriSint64 num_samples;
+    CriSint32 num_sampling_rate;
+
+    criAtomExAsrRack_GetNumOutputSamples(rack_id, &num_samples, &num_sampling_rate);
+    
+    return std::make_tuple(num_samples, num_sampling_rate);
+}
+
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumRenderedSamples(void)
+{
+    return ADXRuntime::GetNumRenderedSamples(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumRenderedSamples(const CriAtomExAsrRackId rack_id)
+{
+    CriSint64 num_samples;
+    CriSint32 num_sampling_rate;
+
+    criAtomExAsrRack_GetNumRenderedSamples(rack_id, &num_samples, &num_sampling_rate);
+    
+    return std::make_tuple(num_samples, num_sampling_rate);
+}
+
+CriAtomExAsrRackPerformanceInfo ADXRuntime::GetPerformanceInfo(void)
+{
+    return ADXRuntime::GetPerformanceInfo(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+CriAtomExAsrRackPerformanceInfo ADXRuntime::GetPerformanceInfo(const CriAtomExAsrRackId rack_id)
+{
+    CriAtomExAsrRackPerformanceInfo info;
+    criAtomExAsrRack_GetPerformanceInfo(rack_id, &info);
+    return info;
+}
+
+void ADXRuntime::ResetPerformanceInfo(void)
+{
+    ADXRuntime::ResetPerformanceInfo(CRIATOMEXASR_RACK_DEFAULT_ID);
+}
+
+void ADXRuntime::ResetPerformanceInfo(const CriAtomExAsrRackId rack_id)
+{
+    criAtomExAsrRack_ResetPerformanceMonitor(rack_id);
 }
 
 VoicePool::Config::Config()
@@ -161,6 +276,16 @@ Player::Config::Config()
     criAtomExPlayer_SetDefaultConfig(&this->player_config);
     criAtomEx3dSource_SetDefaultConfig(&this->source_config);
     criAtomEx3dListener_SetDefaultConfig(&this->listener_config);
+}
+
+Player::DataRequestObj::DataRequestObj()
+{
+    this->length = 1024;
+    this->sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
+    this->frequency = 0;
+    this->offset = 0.0f;
+    memset(this->buffer[0], 0, 1024 * sizeof(int16_t));
+    memset(this->buffer[1], 0, 1024 * sizeof(int16_t));
 }
 
 void Player::Player::CreatePlayer(const Player::Config& config)
