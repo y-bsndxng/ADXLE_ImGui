@@ -11,6 +11,7 @@ void ADXUtils::UserErrorCallBackFunc(const CriChar8* errid, CriUint32 p1, CriUin
 	/* エラー文字列の表示 */
 	errmsg = criErr_ConvertIdToMessage(errid, p1, p2);
 	error_message = std::string(errmsg);
+    printf("%s\n", errmsg);
 
 	return;
 }

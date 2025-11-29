@@ -58,6 +58,16 @@ public:
         CriAtomEx3dSourceConfig source_config;
         CriAtomEx3dListenerConfig listener_config;
     };
+    struct DataRequestObj {
+        DataRequestObj();
+        ~DataRequestObj() {};
+        int32_t index;
+        int32_t length;
+        int32_t sampling_rate;
+        int32_t frequency;
+        float offset;
+        int16_t buffer[2][1024];
+    };
     Player() {};
     ~Player() {};
     int32_t num_players = 0;
@@ -95,10 +105,10 @@ namespace ADXRuntime {
 	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
     CriAtomSpeakerMapping GetSpeakerMapping(void);
     CriAtomSpeakerMapping GetSpeakerMapping(const CriAtomExAsrRackId rack_id);
-    std::tuple<int32_t, int32_t> GetNumOutputSamples(void);
-    std::tuple<int32_t, int32_t> GetNumOutputSamples(const CriAtomExAsrRackId rack_id);
-    std::tuple<int32_t, int32_t> GetNumRenderedSamples(void);
-    std::tuple<int32_t, int32_t> GetNumRenderedSamples(const CriAtomExAsrRackId rack_id);
+    std::tuple<int64_t, int32_t> GetNumOutputSamples(void);
+    std::tuple<int64_t, int32_t> GetNumOutputSamples(const CriAtomExAsrRackId rack_id);
+    std::tuple<int64_t, int32_t> GetNumRenderedSamples(void);
+    std::tuple<int64_t, int32_t> GetNumRenderedSamples(const CriAtomExAsrRackId rack_id);
     CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(void);
     CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(const CriAtomExAsrRackId rack_id);
     void ResetPerformanceInfo(void);

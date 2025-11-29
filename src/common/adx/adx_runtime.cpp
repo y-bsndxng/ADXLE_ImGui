@@ -100,8 +100,12 @@ std::tuple<bool, CriAtomExAcfInfo> ADXRuntime::GetAcfInfo(void)
 
 std::tuple<bool, CriAtomExAcbInfo> ADXRuntime::GetAcbInfo(void)
 {
-    CriAtomExAcbInfo info;
-    bool result;
+    CriAtomExAcbInfo info { 0 };
+    bool result = false;
+
+    if (ADXRuntime::acb_hn == NULL) {
+        return std::make_tuple(result, info);
+    }
     
     if (criAtomExAcb_GetAcbInfo(ADXRuntime::acb_hn, &info) == CRI_FALSE) {
         result = false;
@@ -159,12 +163,12 @@ CriAtomSpeakerMapping ADXRuntime::GetSpeakerMapping(const CriAtomExAsrRackId rac
     return criAtomExAsrRack_GetSpeakerMapping(rack_id);
 }
 
-std::tuple<int32_t, int32_t> ADXRuntime::GetNumOutputSamples(void)
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumOutputSamples(void)
 {
     return ADXRuntime::GetNumOutputSamples(CRIATOMEXASR_RACK_DEFAULT_ID);
 }
 
-std::tuple<int32_t, int32_t> ADXRuntime::GetNumOutputSamples(const CriAtomExAsrRackId rack_id)
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumOutputSamples(const CriAtomExAsrRackId rack_id)
 {
     CriSint64 num_samples;
     CriSint32 num_sampling_rate;
@@ -174,12 +178,12 @@ std::tuple<int32_t, int32_t> ADXRuntime::GetNumOutputSamples(const CriAtomExAsrR
     return std::make_tuple(num_samples, num_sampling_rate);
 }
 
-std::tuple<int32_t, int32_t> ADXRuntime::GetNumRenderedSamples(void)
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumRenderedSamples(void)
 {
     return ADXRuntime::GetNumRenderedSamples(CRIATOMEXASR_RACK_DEFAULT_ID);
 }
 
-std::tuple<int32_t, int32_t> ADXRuntime::GetNumRenderedSamples(const CriAtomExAsrRackId rack_id)
+std::tuple<int64_t, int32_t> ADXRuntime::GetNumRenderedSamples(const CriAtomExAsrRackId rack_id)
 {
     CriSint64 num_samples;
     CriSint32 num_sampling_rate;
@@ -272,6 +276,16 @@ Player::Config::Config()
     criAtomExPlayer_SetDefaultConfig(&this->player_config);
     criAtomEx3dSource_SetDefaultConfig(&this->source_config);
     criAtomEx3dListener_SetDefaultConfig(&this->listener_config);
+}
+
+Player::DataRequestObj::DataRequestObj()
+{
+    this->length = 1024;
+    this->sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
+    this->frequency = 0;
+    this->offset = 0.0f;
+    memset(this->buffer[0], 0, 1024 * sizeof(int16_t));
+    memset(this->buffer[1], 0, 1024 * sizeof(int16_t));
 }
 
 void Player::Player::CreatePlayer(const Player::Config& config)

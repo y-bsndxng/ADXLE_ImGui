@@ -112,8 +112,8 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
         voicepool_config.wave_config.player_config.max_sampling_rate = num_sampling_rate;
 
         voicepool_config.standard_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-        voicepool_config.rawpcm_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
-        voicepool_config.wave_config.player_config.max_sampling_rate = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.rawpcm_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
+        voicepool_config.wave_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
 
         voicepool_config.standard_config.player_config.streaming_flag = CRI_TRUE;
 

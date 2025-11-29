@@ -5,6 +5,7 @@
 static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
+static void DataRequestCallback(void *obj, CriAtomExPlaybackId id, CriAtomPlayerHn player);
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 
 void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
@@ -82,6 +83,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
         ImGui::TreePop();
     }
 	ImGui::End();
+
+    criAtomEx_ExecuteMain();
 }
 
 static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
@@ -298,6 +301,26 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
     }
     ImGui::Separator();
+    if (ImGui::TreeNode("PCM")) {
+		static float freq = 440.0f;
+        static Player::DataRequestObj obj;
+		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
+
+		if (ImGui::Button("Set")) {
+            obj.frequency = (int32_t)freq;
+	        criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
+	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
+	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
+            criAtomExPlayer_SetData(player, obj.buffer[0], obj.length * sizeof(CriSint16));
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Unet")) {
+	        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
+		}
+
+		ImGui::TreePop();
+	}
+    ImGui::Separator();
     if (ImGui::Button("Start")) {
         if (!cue_names.empty()) {
             auto name = cue_names.at(selected_cue_index).c_str();
@@ -382,9 +405,7 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         ImGui::SliderFloat("Pan3d Elevation", &pan3d_elevation, -180.0f, 180.0f);
         ImGui::SliderFloat("Pan3d Distance", &pan3d_distance, 0.0f, 1.0f);
         criAtomExPlayer_SetPan3dAngle(player, pan3d_angle);
-#if (CRI_ATOM_VER_MINOR) >= (28)
         criAtomExPlayer_SetPan3dElevation(player, pan3d_elevation);
-#endif
         criAtomExPlayer_SetPan3dInteriorDistance(player, pan3d_distance);
 
         ImGui::TreePop();
@@ -460,6 +481,28 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	ImGui::End();
 }
 
+static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayerHn player)
+{
+    Player::DataRequestObj* obj_ = (Player::DataRequestObj*)obj;
+    int16_t* buffer;
+	float sin_step = 2.0f * 3.141592f * obj_->frequency / obj_->sampling_rate;
+
+	UNUSED(id);
+	
+    obj_->index++;
+    obj_->index %= 2;;
+	buffer = obj_->buffer[obj_->index];
+
+	for (auto i = 0; i < obj_->length; i++) {
+		buffer[i] = (CriSint16)(sinf(obj_->offset) * 32767.0f);
+		obj_->offset += sin_step;
+	}
+	
+	obj_->offset = fmodf(obj_->offset, 2.0f * 3.141592f);
+
+	criAtomPlayer_SetData(player, buffer,  obj_->length* sizeof(int16_t));
+}
+
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
@@ -468,8 +511,8 @@ static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::Begin("Mixer", is_open, ImGuiWindowFlags_NoSavedSettings);
     
     auto speaker_mapping = ADXRuntime::GetSpeakerMapping();
-    auto [num_rendered_samples, _] = ADXRuntime::GetNumRenderedSamples();
-    auto [num_output_samples, _] = ADXRuntime::GetNumOutputSamples();
+    auto [num_rendered_samples, num_rendered_sampling_rate] = ADXRuntime::GetNumRenderedSamples();
+    auto [num_output_samples, num_output_sampling_rate] = ADXRuntime::GetNumOutputSamples();
     auto info = ADXRuntime::GetPerformanceInfo();
     
     if (ImGui::BeginTabBar("TabBar##Mixer", tab_bar_flags)) {
