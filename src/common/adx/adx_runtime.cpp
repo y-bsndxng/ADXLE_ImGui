@@ -58,6 +58,16 @@ void ADXRuntime::Finalize(void)
 #endif
 }
 
+void ADXRuntime::LoadFile(const char* acf_file, const char* acb_file, const char* awb_file)
+{
+    CriBool result = criAtomEx_RegisterAcfFile(NULL, acf_file, NULL, 0);
+    
+    if (result != CRI_FALSE) {
+        ADXRuntime::UnloadFile();
+        ADXRuntime::LoadFile(acb_file, awb_file);
+    }
+}
+
 void ADXRuntime::LoadFile(const char* acb_file, const char* awb_file)
 {
     CriAtomExAcbHn acb_hn_ = NULL;
@@ -117,14 +127,27 @@ std::tuple<bool, CriAtomExAcbInfo> ADXRuntime::GetAcbInfo(void)
 
 std::tuple<bool, CriAtomExCueInfo> ADXRuntime::GetCueInfo(const char* name)
 {
-    CriAtomExCueInfo info;
-    bool result;
+    CriAtomExCueInfo info{ 0 };
+    bool result = false;
     
     if (criAtomExAcb_GetCueInfoByName(ADXRuntime::acb_hn, name, &info) == CRI_FALSE) {
         result = false;
     } else {
         result = true;
     }
+    return std::make_tuple(result, info);
+}
+
+std::tuple<bool, CriAtomExAcfDspBusInfo> ADXRuntime::GetBusInfo(const int32_t bus_index)
+{
+    CriSint32 num_buses = criAtomExAcf_GetNumBuses();
+    CriAtomExAcfDspBusInfo info { 0 };
+    bool result = false;
+    
+    if (num_buses > 0) {
+        criAtomExAcf_GetDspBusInformation((CriUint16)bus_index, &info);
+    }
+    
     return std::make_tuple(result, info);
 }
 
@@ -141,6 +164,54 @@ std::vector<std::string> ADXRuntime::GetCueNames(void)
     }
 
     return cue_names;
+}
+
+std::vector<std::string> ADXRuntime::GetBusNames(void)
+{
+    std::vector<std::string> names;
+    CriAtomExAcfDspSettingInfo setting_info;
+    CriAtomExAcfDspBusInfo bus_info;
+    CriSint32 num_settings = criAtomExAcf_GetNumDspSettings();
+    CriBool result;
+    
+    if (num_settings < 0) {
+        return names;
+    }
+
+    for (auto i = 0; i < num_settings; i++) {
+        result = criAtomExAcf_GetDspSettingInformation(criAtomExAcf_GetDspSettingNameByIndex((CriUint16)i), &setting_info);
+        if (result == CRI_FALSE) {
+            return names;
+        }
+        names.resize(setting_info.num_buses);
+        for (auto j = 0; j < setting_info.num_buses; j++) {
+            criAtomExAcf_GetDspBusInformation((CriUint16)j, &bus_info);
+            names.at(j) = bus_info.name;
+        }
+    }
+
+    return names;
+}
+
+std::vector<std::string> ADXRuntime::GetAfxNames(const CriAtomExAsrRackId rack_id, const int32_t bus_index)
+{
+    std::vector<std::string> names;
+    CriSint32 num_buses = criAtomExAcf_GetNumBuses();
+    
+    if (num_buses > 0) {
+        auto [result, bus_info] = ADXRuntime::GetBusInfo(bus_index);
+        names.resize(bus_info.num_fxes);
+        for (auto i = 0; i < bus_info.num_fxes; i++) {
+            names.at(i) = criAtomExAsrRack_GetEffectName(rack_id, bus_info.name, i);
+        }
+    }
+
+    return names;
+}
+
+std::vector<std::string> ADXRuntime::GetAfxNames(const int32_t bus_index)
+{
+    return ADXRuntime::GetAfxNames(CRIATOMEXASR_RACK_DEFAULT_ID, bus_index);
 }
 
 std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_type)
@@ -282,10 +353,11 @@ Player::DataRequestObj::DataRequestObj()
 {
     this->length = 1024;
     this->sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
+    this->num_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
     this->frequency = 0;
     this->offset = 0.0f;
-    memset(this->buffer[0], 0, 1024 * sizeof(int16_t));
-    memset(this->buffer[1], 0, 1024 * sizeof(int16_t));
+    this->buffer[0].resize(this->num_channels * this->length);
+    this->buffer[1].resize(this->num_channels * this->length);
 }
 
 void Player::Player::CreatePlayer(const Player::Config& config)

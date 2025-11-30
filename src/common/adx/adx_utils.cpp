@@ -116,3 +116,86 @@ const char* ADXUtils::GetSpeakerMappingString(const CriAtomSpeakerMapping speake
         return "UNKNOWN";
     }
 }
+
+std::map<int32_t, std::string> ADXUtils::GetSpeakerMappingLabel(const CriAtomSpeakerMapping speaker_mapping)
+{
+    std::map<int32_t, std::string> meter_label;
+    
+    switch (speaker_mapping) {
+    case CRIATOM_SPEAKER_MAPPING_OBJECT:
+        meter_label = {
+            {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"},
+            {8, "8"}, {9, "9"}, {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_1P:
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_2P:
+    case CRIATOM_SPEAKER_MAPPING_AMBISONICS_3P:
+        meter_label = {
+            {0, "W"}, {1, "X"}, {2, "Y"}, {3, "Z"}, {4, "R"}, {5, "S"}, {6, "T"}, {7, "U"},
+            {8, "V"}, {9, "K"}, {10, "L"}, {11, "M"}, {12, "N"}, {13, "O"}, {14, "P"}, {15, "Q"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_7_1_4_4:
+        meter_label = {
+            {0, "L"}, {1, "R"}, {2, "C"}, {3, "LFE"}, {4, "SL"}, {5, "SR"}, {6, "BL"}, {7, "BR"},
+            {8, "TFL"}, {9, "TFR"}, {10, "TBL"}, {11, "TBR"}, {12, "BFL"}, {13, "BFR"}, {14, "BBL"}, {15, "BBR"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_7_1_4:
+        meter_label = {
+            {0, "L"}, {1, "R"}, {2, "C"}, {3, "LFE"}, {4, "SL"}, {5, "SR"}, {6, "BL"}, {7, "BR"},
+            {8, "TFL"}, {9, "TFR"}, {10, "TBL"}, {11, "TBR"}, {12, "BFL"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_7_1_2:
+        meter_label = {
+            {0, "L"}, {1, "R"}, {2, "C"}, {3, "LFE"}, {4, "SL"}, {5, "SR"}, {6, "BL"}, {7, "BR"},
+            {8, "TL"}, {9, "TR"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_5_1_2:
+        meter_label = {
+            {0, "L"}, {1, "R"}, {2, "C"}, {3, "LFE"}, {4, "SL"}, {5, "SR"}, {6, "TL"}, {7, "TR"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_MONO:
+        meter_label = {
+            {0, "C"},
+        };
+        break;
+    case CRIATOM_SPEAKER_MAPPING_AUTO:
+        meter_label = {
+            {0, "L"}, {1, "R"}, {2, "C"}, {3, "LFE"}, {4, "SL"}, {5, "SR"}, {6, "BL"}, {7, "BR"},
+            {8, "TFL"}, {9, "TFR"}, {10, "TBL"}, {11, "TBR"}, {12, "BFL"}, {13, "BFR"}, {14, "BBL"}, {15, "BBR"},
+        };
+        break;
+    default:
+        meter_label = {
+            {0, "L"}, {1, "R"}, {2, "C"}, {3, "LFE"}, {4, "SL"}, {5, "SR"}, {6, "BL"}, {7, "BR"},
+            {8, "TFL"}, {9, "TFR"}, {10, "TBL"}, {11, "TBR"}, {12, "BFL"}, {13, "BFR"}, {14, "BBL"}, {15, "BBR"},
+        };
+        break;
+    }
+    
+    return meter_label;
+}
+
+float ADXUtils::LevelToDecibel(float value)
+{
+    float decibel = 0.0f;
+
+    if (value <= 0.0f) {
+        decibel = -96.0f;
+    } else {
+        decibel = 20.0f * log10f(value);
+    }
+
+    return decibel;
+}
+
+float ADXUtils::NormalizeDecibel(float decibel)
+{
+    float min_db = -96.0f;
+    return std::clamp((decibel - min_db) / (0.0f - min_db), 0.0f, 1.0f);
+}

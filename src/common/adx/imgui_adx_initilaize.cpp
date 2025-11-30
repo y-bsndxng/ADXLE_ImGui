@@ -17,8 +17,8 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	static int32_t num_players = 5;
 	ImVec2 file_dialog_window_size = { 800, 600 };
 
-	ImGui::SetNextWindowPos(pos);
-	ImGui::SetNextWindowSize(size);
+    ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
 	ImGui::Begin("Initialize", nullptr, ImGuiWindowFlags_NoSavedSettings);
 

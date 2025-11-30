@@ -62,11 +62,12 @@ public:
         DataRequestObj();
         ~DataRequestObj() {};
         int32_t index;
+        int32_t num_channels;
         int32_t length;
         int32_t sampling_rate;
         int32_t frequency;
         float offset;
-        int16_t buffer[2][1024];
+        std::vector<int16_t> buffer[2];
     };
     Player() {};
     ~Player() {};
@@ -81,43 +82,48 @@ private:
 };
 
 namespace ADXRuntime {
-    struct Config {
-        Config();
-        ~Config() {};
-        #if defined(XPT_TGT_PC)
-        CriAtomExConfig_WASAPI specific_config;
-        #elif defined(XPT_TGT_MACOSX)
-        CriAtomExConfig_MACOSX specific_config;
-        #endif
-        CriAtomExMonitorConfig monitor_config;
-		CriAtomExAcfRegistrationInfo acf_info;
-        CriAtomExDbasConfig dbas_config;
-    };
-	void Initialize(const ADXRuntime::Config& config);
-	bool IsInitilaized(void);
-	void Finalize(void);
-    void LoadFile(const char* acb_file, const char* awb_file);
-    void UnloadFile(void);
-    std::tuple<bool, CriAtomExAcfInfo> GetAcfInfo(void);
-    std::tuple<bool, CriAtomExAcbInfo> GetAcbInfo(void);
-    std::tuple<bool, CriAtomExCueInfo> GetCueInfo(const char* name);
-    std::vector<std::string> GetCueNames(void);
-	std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
-    CriAtomSpeakerMapping GetSpeakerMapping(void);
-    CriAtomSpeakerMapping GetSpeakerMapping(const CriAtomExAsrRackId rack_id);
-    std::tuple<int64_t, int32_t> GetNumOutputSamples(void);
-    std::tuple<int64_t, int32_t> GetNumOutputSamples(const CriAtomExAsrRackId rack_id);
-    std::tuple<int64_t, int32_t> GetNumRenderedSamples(void);
-    std::tuple<int64_t, int32_t> GetNumRenderedSamples(const CriAtomExAsrRackId rack_id);
-    CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(void);
-    CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(const CriAtomExAsrRackId rack_id);
-    void ResetPerformanceInfo(void);
-    void ResetPerformanceInfo(const CriAtomExAsrRackId rack_id);
+struct Config {
+    Config();
+    ~Config() {};
+    #if defined(XPT_TGT_PC)
+    CriAtomExConfig_WASAPI specific_config;
+    #elif defined(XPT_TGT_MACOSX)
+    CriAtomExConfig_MACOSX specific_config;
+    #endif
+    CriAtomExMonitorConfig monitor_config;
+    CriAtomExAcfRegistrationInfo acf_info;
+    CriAtomExDbasConfig dbas_config;
+};
+void Initialize(const ADXRuntime::Config& config);
+bool IsInitilaized(void);
+void Finalize(void);
+void LoadFile(const char* acf_file, const char* acb_file, const char* awb_file);
+void LoadFile(const char* acb_file, const char* awb_file);
+void UnloadFile(void);
+std::tuple<bool, CriAtomExAcfInfo> GetAcfInfo(void);
+std::tuple<bool, CriAtomExAcbInfo> GetAcbInfo(void);
+std::tuple<bool, CriAtomExCueInfo> GetCueInfo(const char* name);
+std::tuple<bool, CriAtomExAcfDspBusInfo> GetBusInfo(const int32_t bus_index);
+std::vector<std::string> GetCueNames(void);
+std::vector<std::string> GetBusNames(void);
+std::vector<std::string> GetAfxNames(const CriAtomExAsrRackId rack_id, const int32_t bus_index);
+std::vector<std::string> GetAfxNames(const int32_t bus_index);
+std::tuple<int32_t, int32_t> GetNumUsedVoicePools(const VoiceType voice_type);
+CriAtomSpeakerMapping GetSpeakerMapping(void);
+CriAtomSpeakerMapping GetSpeakerMapping(const CriAtomExAsrRackId rack_id);
+std::tuple<int64_t, int32_t> GetNumOutputSamples(void);
+std::tuple<int64_t, int32_t> GetNumOutputSamples(const CriAtomExAsrRackId rack_id);
+std::tuple<int64_t, int32_t> GetNumRenderedSamples(void);
+std::tuple<int64_t, int32_t> GetNumRenderedSamples(const CriAtomExAsrRackId rack_id);
+CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(void);
+CriAtomExAsrRackPerformanceInfo GetPerformanceInfo(const CriAtomExAsrRackId rack_id);
+void ResetPerformanceInfo(void);
+void ResetPerformanceInfo(const CriAtomExAsrRackId rack_id);
 
-	/* Runtime Object */
-	inline VoicePool vp;
-    inline Player player;
-    inline std::vector<CriAtomExPlaybackId> playback_ids;
-    inline CriAtomExAcbHn acb_hn;
-    inline CriAtomExDbasId dbas_id;
+/* Runtime Object */
+inline VoicePool vp;
+inline Player player;
+inline std::vector<CriAtomExPlaybackId> playback_ids;
+inline CriAtomExAcbHn acb_hn;
+inline CriAtomExDbasId dbas_id;
 }

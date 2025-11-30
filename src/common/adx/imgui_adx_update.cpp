@@ -2,14 +2,17 @@
 #include <adx_utils.h>
 #include <adx_runtime.h>
 
-static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
+static void FileWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
+static void VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void DataRequestCallback(void *obj, CriAtomExPlaybackId id, CriAtomPlayerHn player);
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
+static void BusMeter(void);
 
 void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 {
+    static bool is_open_file_window = false;
 	static bool is_open_voicepool_window = false;
     static bool is_open_info_window = false;
 	static bool is_open_player_window = false;
@@ -26,6 +29,20 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 	ImGui::Begin("Update", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
 	ImGui::Text("Error : %s", ADXUtils::GetErrorMessage().c_str());
+    if (ImGui::TreeNode("File")) {
+        if (ImGui::Button("Open")) {
+            is_open_file_window = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Close")) {
+            is_open_file_window = false;
+        }
+        if (is_open_file_window) {
+            ImVec2 window_size{ size.x + 400.0f, size.y };
+            FileWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_file_window);
+        }
+        ImGui::TreePop();
+    }
     if (ImGui::TreeNode("Info")) {
         if (ImGui::Button("Open")) {
             is_open_info_window = true;
@@ -68,7 +85,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 		}
 		ImGui::TreePop();
 	}
-    if (ImGui::TreeNode("Mixeer")) {
+    if (ImGui::TreeNode("Mixer")) {
         if (ImGui::Button("Open")) {
             is_open_mixer_window = true;
         }
@@ -85,6 +102,67 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 	ImGui::End();
 
     criAtomEx_ExecuteMain();
+}
+
+static void FileWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
+{
+    constexpr int32_t path_length = 512;
+    static char acf_file[path_length] = "";
+    static char acb_file[path_length] = "";
+    static char awb_file[path_length] = "";
+    ImVec2 file_dialog_window_size = { 800, 600 };
+    
+    ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+    ImGui::Begin("File", is_open, ImGuiWindowFlags_NoSavedSettings);
+    
+    ImGui::InputText("ACF File", acf_file, IM_ARRAYSIZE(acf_file));
+    ImGui::SameLine();
+    if (ImGui::Button("Open##ACF")) {
+        IGFD::FileDialogConfig config;
+        config.path = ImGuiUtils::GetCurrentPath();
+        ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseACFFileDlgKey", "Choose File", ".acf", config);
+    }
+    ImGuiUtils::OpenDialog("ChooseACFFileDlgKey", acf_file);
+    ImGui::SameLine();
+    if (ImGui::Button("Clear##ACF")) {
+        memset(&acf_file, 0, sizeof(acf_file));
+    }
+
+    ImGui::InputText("ACB File", acb_file, IM_ARRAYSIZE(acb_file));
+    ImGui::SameLine();
+    if (ImGui::Button("Open##ACB")) {
+        IGFD::FileDialogConfig config;
+        config.path = ImGuiUtils::GetCurrentPath();
+        ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseACBFileDlgKey", "Choose File", ".acb", config);
+    }
+    ImGuiUtils::OpenDialog("ChooseACBFileDlgKey", acb_file);
+    ImGui::SameLine();
+    if (ImGui::Button("Clear##ACB")) {
+        memset(&acb_file, 0, sizeof(acb_file));
+    }
+
+    ImGui::InputText("AWB File", awb_file, IM_ARRAYSIZE(awb_file));
+    ImGui::SameLine();
+    if (ImGui::Button("Open##AWB")) {
+        IGFD::FileDialogConfig config;
+        config.path = ImGuiUtils::GetCurrentPath();
+        ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseAWBFileDlgKey", "Choose File", ".awb", config);
+    }
+    ImGuiUtils::OpenDialog("ChooseAWBFileDlgKey", awb_file);
+    ImGui::SameLine();
+    if (ImGui::Button("Clear##AWB")) {
+        memset(&awb_file, 0, sizeof(awb_file));
+    }
+    
+    if (ImGui::Button("Load")) {
+        ADXRuntime::LoadFile(acf_file, awb_file, awb_file);
+    }
+    
+    ImGui::End();
 }
 
 static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
@@ -167,7 +245,7 @@ static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             ImGui::EndTable();
         }
     }
-    
+
     ImGui::SeparatorText("Cue Info");
     if (!cue_names.empty()) {
         ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
@@ -203,7 +281,7 @@ static void InfoWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         }
     }
 
-    
+
     ImGui::End();
 }
 
@@ -296,30 +374,6 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 		ImGui::TableNextRow();
 		ImGui::EndTable();
 	}
-    
-    if (!cue_names.empty()) {
-        ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
-    }
-    ImGui::Separator();
-    if (ImGui::TreeNode("PCM")) {
-		static float freq = 440.0f;
-        static Player::DataRequestObj obj;
-		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
-
-		if (ImGui::Button("Set")) {
-            obj.frequency = (int32_t)freq;
-	        criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
-	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
-	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
-            criAtomExPlayer_SetData(player, obj.buffer[0], obj.length * sizeof(CriSint16));
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Unet")) {
-	        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
-		}
-
-		ImGui::TreePop();
-	}
     ImGui::Separator();
     if (ImGui::Button("Start")) {
         if (!cue_names.empty()) {
@@ -366,6 +420,34 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     if (is_loop != false) {
         criAtomExPlayer_LimitLoopCount(player, CRIATOMEXPLAYER_FORCE_LOOP);
     }
+    ImGui::Separator();
+    if (ImGui::TreeNode("Cue")) {
+        if (!cue_names.empty()) {
+            ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
+        }
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("PCM")) {
+		static float freq = 440.0f;
+        static Player::DataRequestObj obj;
+		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
+
+		if (ImGui::Button("Set")) {
+            obj.frequency = (int32_t)freq;
+	        criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
+            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
+	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
+	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
+            criAtomExPlayer_SetData(player, obj.buffer[0].data(), obj.length * obj.num_channels * sizeof(CriSint16));
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Unet")) {
+	        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
+		}
+
+		ImGui::TreePop();
+	}
     ImGui::Separator();
     if (ImGui::TreeNode("Volume")) {
         static float volume = 1.0f;
@@ -484,56 +566,62 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayerHn player)
 {
     Player::DataRequestObj* obj_ = (Player::DataRequestObj*)obj;
-    int16_t* buffer;
 	float sin_step = 2.0f * 3.141592f * obj_->frequency / obj_->sampling_rate;
+    int16_t* buffer;
 
 	UNUSED(id);
-	
+    
     obj_->index++;
-    obj_->index %= 2;;
-	buffer = obj_->buffer[obj_->index];
-
-	for (auto i = 0; i < obj_->length; i++) {
-		buffer[i] = (CriSint16)(sinf(obj_->offset) * 32767.0f);
-		obj_->offset += sin_step;
-	}
+    obj_->index %= 2;
+    buffer = obj_->buffer[obj_->index].data();
+    
+    for (auto ch = 0; ch < obj_->num_channels; ch++) {
+        for (auto i = 0; i < obj_->length; i++) {
+            buffer[i * obj_->num_channels + ch] = (int16_t)(sinf(obj_->offset) * 32767.0f);
+        }
+        obj_->offset += sin_step;
+    }
 	
 	obj_->offset = fmodf(obj_->offset, 2.0f * 3.141592f);
 
-	criAtomPlayer_SetData(player, buffer,  obj_->length* sizeof(int16_t));
+	criAtomPlayer_SetData(player, buffer, obj_->length * obj_->num_channels * sizeof(int16_t));
 }
 
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
+    static int32_t selected_bus_index = 0;
+    auto speaker_mapping = ADXRuntime::GetSpeakerMapping();
+    auto [num_rendered_samples, num_rendered_sampling_rate] = ADXRuntime::GetNumRenderedSamples();
+    auto [num_output_samples, num_output_sampling_rate] = ADXRuntime::GetNumOutputSamples();
+    auto [result, bus_info] = ADXRuntime::GetBusInfo(selected_bus_index);
+    auto info = ADXRuntime::GetPerformanceInfo();
+    auto bus_names = ADXRuntime::GetBusNames();
+
+
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
     ImGui::Begin("Mixer", is_open, ImGuiWindowFlags_NoSavedSettings);
-    
-    auto speaker_mapping = ADXRuntime::GetSpeakerMapping();
-    auto [num_rendered_samples, num_rendered_sampling_rate] = ADXRuntime::GetNumRenderedSamples();
-    auto [num_output_samples, num_output_sampling_rate] = ADXRuntime::GetNumOutputSamples();
-    auto info = ADXRuntime::GetPerformanceInfo();
-    
+
     if (ImGui::BeginTabBar("TabBar##Mixer", tab_bar_flags)) {
         if (ImGui::BeginTabItem("Info")) {
-            ImGui::SeparatorText("Status Info");
-            if (ImGui::BeginTable("Status Info Table", 2)) {
+            ImGui::SeparatorText("Config");
+            if (ImGui::BeginTable("Table##Config", 2)) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Speaker Mapping");
                 ImGui::TableSetColumnIndex(1); ImGui::Text("%s", ADXUtils::GetSpeakerMappingString(speaker_mapping));
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Rendered Samples");
-                ImGui::TableSetColumnIndex(1); ImGui::Text("%d", num_rendered_samples);
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%lld", num_rendered_samples);
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Number of Output Samples");
-                ImGui::TableSetColumnIndex(1); ImGui::Text("%d", num_output_samples);
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%lld", num_output_samples);
                 ImGui::TableNextRow();
                 ImGui::EndTable();
             }
 
-            ImGui::SeparatorText("Performance Info");
-            if (ImGui::BeginTable("Performance Info Table", 2)) {
+            ImGui::SeparatorText("Performance");
+            if (ImGui::BeginTable("Table##Performance", 2)) {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Last Process Time");
                 ImGui::TableSetColumnIndex(1); ImGui::Text("%d (us)", info.last_process_time);
@@ -559,12 +647,162 @@ static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             if (ImGui::Button("Reset")) {
                 ADXRuntime::ResetPerformanceInfo();
             }
+
+            ImGui::SeparatorText("Bus");
+            if (!bus_names.empty()) {
+                ImGuiUtils::Comboui("Bus", &selected_bus_index, &bus_names);
+            }
+
+            if (ImGui::BeginTable("Table##Bus", 2)) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Name");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%s", bus_info.name);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Volume");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", bus_info.volume);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Pan3D Volume");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", bus_info.pan3d_volume);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Pan3D Spread");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", bus_info.pan3d_spread);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Pan3D Distance");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", bus_info.pan3d_distance);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Pan3D Angle");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", bus_info.pan3d_angle);
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Bus Number Of AFXes");
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%d", bus_info.num_fxes);
+                ImGui::TableNextRow();
+                ImGui::EndTable();
+            }
+
+            ImGui::SeparatorText("Effect");
+            if (bus_info.num_fxes > 0) {
+                auto afx_names = ADXRuntime::GetAfxNames(selected_bus_index);
+                if (ImGui::BeginTable("AFX Info Table", 2)) {
+                    for (const auto& name : afx_names) {
+                        ImGui::TableNextRow();
+                        ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "EffectName");
+                        ImGui::TableSetColumnIndex(1); ImGui::Text("%s", name.c_str());
+                    }
+                    ImGui::EndTable();
+                }
+            }
+
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Meter")) {
+            BusMeter();
+            ImGui::EndTabItem();
+        }
     }
     ImGui::EndTabBar();
 
 
     ImGui::End();
+}
+
+static void BusMeter(void)
+{
+    int32_t ch, max_channels;
+    std::vector<float> rms_values, peak_values, peak_hold_values;
+    float histogram_width = 100.0f;
+    float histogram_height = 300.0f;
+    float padding_histogram_width = 30.0f;
+    ImFont* font = ImGui::GetFont();
+    float   base_size = ImGui::GetFontSize();
+    auto bus_names = ADXRuntime::GetBusNames();
+    
+    for (auto i = 0; i < bus_names.size(); i++) {
+        ImDrawList* draw_list;
+        ImVec2 cursor_position;
+        ImVec2 base;
+        float font_scale;
+        const char* bus_name = bus_names.at(i).c_str();
+        auto [result, bus_info] = ADXRuntime::GetBusInfo(i);
+        std::map<int32_t, std::string> meter_label;
+
+        max_channels = criAtomExAsrRack_GetNumBusChannelsByName(CRIATOMEXASR_RACK_DEFAULT_ID, bus_name);
+        rms_values.resize(max_channels);
+        peak_values.resize(max_channels);
+        peak_hold_values.resize(max_channels);
+
+        criAtomExAsrRack_GetBusRmsLevelByName(CRIATOMEXASR_RACK_DEFAULT_ID, bus_name, rms_values.data(), max_channels);
+        criAtomExAsrRack_GetBusPeakLevelByName(CRIATOMEXASR_RACK_DEFAULT_ID, bus_name, peak_values.data(), max_channels);
+        criAtomExAsrRack_GetBusPeakHoldLevelByName(CRIATOMEXASR_RACK_DEFAULT_ID, bus_name, peak_hold_values.data(), max_channels);
+        meter_label = ADXUtils::GetSpeakerMappingLabel(bus_info.speaker_mapping);
+
+        /* パディングサイズを最大チャンネル数から求める */
+        padding_histogram_width = max_channels * 10.0f;
+
+        /* パディングによりヒストグラム間を調整 */
+        ImGui::SameLine(0.0f, 50.0f);
+
+        /* ヒストグラム描画位置の高さ方向を固定 */
+        ImGui::SetCursorPosY(ImGui::GetWindowSize().y / 5.0f);
+
+        /* 描画対象リストを作成 */
+        draw_list = ImGui::GetWindowDrawList();
+
+        /* グループ化して表示 */
+        ImGui::BeginGroup();
+
+        /* ヒストグラムの上に表示 */
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX());
+        ImGui::Text("%s", bus_name);
+
+        /* 現在のカーソル位置を取得 */
+        cursor_position = ImGui::GetCursorScreenPos();
+        base = ImGui::GetCursorScreenPos();
+    
+        /* チャンネル数に応じてフォントを 0.7～1.0 倍に縮小   */
+        font_scale = ImClamp(1.0f - 0.05f * (max_channels - 1), 0.4f, 1.0f);
+
+        for (ch = 0; ch < max_channels; ch++) {
+            const char* label = meter_label[ch].c_str();
+            /* 各バーの矩形領域*/
+            ImVec2 bar_size{ histogram_width / max_channels, histogram_height };
+            ImVec2 p0(base.x + ch * (bar_size.x + 6.0f), base.y);
+            ImVec2 p1(p0.x + bar_size.x, p0.y + bar_size.y);
+            ImVec2 fill0;
+            ImVec2 label_sz = { ImGui::CalcTextSize(label).x * font_scale, ImGui::CalcTextSize(label).y * font_scale };
+            float text_gap = 4.0f;
+            float hight_rms, hight_peak, hight_peak_hold;
+            float label_x = p0.x + (bar_size.x - label_sz.x) * 0.5f;
+            float label_y = p1.y + text_gap;
+
+            /* 背景 */
+            draw_list->AddRectFilled(p0, p1, IM_COL32(40, 40, 40, 255), 3.0f);
+
+            /* RMS（常時塗り） */
+            hight_rms = ADXUtils::NormalizeDecibel(ADXUtils::LevelToDecibel(rms_values.at(ch))) * bar_size.y;
+            fill0 = ImVec2(p0.x, p1.y - hight_rms);
+            draw_list->AddRectFilled(fill0, p1, IM_COL32(0, 200, 0, 255), 3.0f, ImDrawFlags_RoundCornersBottom);
+
+            /* Peak（赤線）*/
+            hight_peak = ADXUtils::NormalizeDecibel(ADXUtils::LevelToDecibel(peak_values.at(ch))) * bar_size.y;
+            draw_list->AddLine(ImVec2(p0.x, p1.y - hight_peak),
+                ImVec2(p1.x, p1.y - hight_peak),
+                IM_COL32(255, 100, 100, 255), 2.0f);
+
+            /* Peak‑Hold（黄線）*/
+            hight_peak_hold = ADXUtils::NormalizeDecibel(ADXUtils::LevelToDecibel(peak_hold_values.at(ch))) * bar_size.y;
+            draw_list->AddLine(ImVec2(p0.x, p1.y - hight_peak_hold),
+                ImVec2(p1.x, p1.y - hight_peak_hold),
+                IM_COL32(255, 200, 40, 255), 2.0f);
+
+            /* ラベル（中央揃え・縮小フォント） --------------------*/
+            draw_list->AddText(font, base_size * font_scale,
+                ImVec2(label_x, label_y),
+                IM_COL32_WHITE, label);
+        }
+        /* パディング付きのヒストグラムを提示して次の描画位置を整える */
+        ImGui::Dummy(ImVec2(histogram_width + padding_histogram_width, histogram_height));
+        /* グループ化終了 */
+        ImGui::EndGroup();
+    }
 }
