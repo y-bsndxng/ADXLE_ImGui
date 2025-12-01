@@ -213,3 +213,23 @@ float ADXUtils::NormalizeDecibel(float decibel)
     float min_db = -96.0f;
     return std::clamp((decibel - min_db) / (0.0f - min_db), 0.0f, 1.0f);
 }
+
+void ADXUtils::Interleave(
+    const std::vector<std::vector<int16_t>>& src, std::vector<int16_t>& dst, const int32_t max_channels, const int32_t max_samples)
+{
+    for (auto i = 0; i < max_samples; i++) {
+        for (auto ch = 0; ch < max_channels; ch++) {
+            dst.at(i * max_channels + ch) = src.at(ch).at(i);
+        }
+    }
+}
+
+void ADXUtils::Deinterleave(
+    const std::vector<int16_t>& src, std::vector<std::vector<int16_t>>& dst, const int32_t max_channels, const int32_t max_samples)
+{
+    for (auto i = 0; i < max_samples; i++) {
+        for (auto ch = 0; ch < max_channels; ch++) {
+            dst.at(ch).at(i) = src.at(i * max_channels + ch);
+        }
+    }
+}

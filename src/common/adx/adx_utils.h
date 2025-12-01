@@ -21,4 +21,6 @@ const char* GetSpeakerMappingString(const CriAtomSpeakerMapping speaker_mapping)
 std::map<int32_t, std::string> GetSpeakerMappingLabel(const CriAtomSpeakerMapping speaker_mapping);
 float LevelToDecibel(float value);
 float NormalizeDecibel(float decibel);
+void Interleave(const std::vector<std::vector<int16_t>>& src, std::vector<int16_t>& dst, const int32_t max_channels, const int32_t max_samples);
+void Deinterleave(const std::vector<int16_t>& src, std::vector<std::vector<int16_t>>& dst, const int32_t max_channels, const int32_t max_samples);
 }

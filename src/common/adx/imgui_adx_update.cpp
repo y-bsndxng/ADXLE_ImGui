@@ -9,6 +9,7 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void DataRequestCallback(void *obj, CriAtomExPlaybackId id, CriAtomPlayerHn player);
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open);
 static void BusMeter(void);
+static void MasterOutMeter(void);
 
 void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 {
@@ -439,9 +440,8 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             NoiseType::Pink
         };
 
-
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
-        ImGuiUtils::Comboui("VoiceType", &selected_noise_index, &noise_names);
+        ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
         obj.noise_type = noise_types.at(selected_noise_index);
 		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
 
@@ -451,10 +451,11 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             criAtomExPlayer_SetNumChannels(player, obj.num_channels);
 	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
 	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
-            criAtomExPlayer_SetData(player, obj.buffer[0].data(), obj.length * obj.num_channels * sizeof(CriSint16));
+            criAtomExPlayer_SetData(player, obj.buffer[0].data(), obj.length * obj.num_channels * sizeof(int16_t));
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Unet")) {
+            criAtomExPlayer_Stop(player);
 	        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
 		}
 
@@ -590,51 +591,50 @@ static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayer
 {
     Player::DataRequestObj* obj_ = (Player::DataRequestObj*)obj;
 	float sin_step = 2.0f * 3.141592f * obj_->frequency / obj_->sampling_rate;
-    int16_t* buffer;
- 
+    std::vector<std::vector<int16_t>> buffer(obj_->num_channels, std::vector<int16_t>(obj_->length, 0));
+    float coefficient[7] = { 0 };
+    
 	UNUSED(id);
     
     obj_->index++;
     obj_->index %= 2;
-    buffer = obj_->buffer[obj_->index].data();
+    ADXUtils::Deinterleave(obj_->buffer[obj_->index], buffer, obj_->num_channels, obj_->length);
 
     for (auto i = 0; i < obj_->length; i++) {
         for (auto ch = 0; ch < obj_->num_channels; ch++) {
-            CriFloat32 coefficient[7] = { 0 };
             float rand_value = 0.0f;
-            int16_t pcm;
+            float pcm = (float)buffer[ch][i];
             switch (obj_->noise_type) {
             case NoiseType::Sin:
-                pcm = (int16_t)(sinf(obj_->offset) * 32767.0f);
+                buffer[ch][i] = (int16_t)(sinf(obj_->offset) * 32767.0f);
                 break;
             case NoiseType::White:
                 rand_value = (float)rand();
-                pcm = (int16_t)(sinf(2.0f) * 32767.0f * rand_value / RAND_MAX);
+                buffer[ch][i] = (int16_t)(sinf(2.0f) * 32767.0f * rand_value / RAND_MAX);
                 break;
             case NoiseType::Pink:
                 rand_value = rand() / (RAND_MAX / 2.0f) - 1.0f;
-                coefficient[0] = 0.99886f * coefficient[0] + 0.0555179f * buffer[i * obj_->num_channels + ch];
-                coefficient[1] = 0.99332f * coefficient[1] + 0.0750759f * buffer[i * obj_->num_channels + ch];
-                coefficient[2] = 0.96900f * coefficient[2] + 0.1538520f * buffer[i * obj_->num_channels + ch];
-                coefficient[3] = 0.86650f * coefficient[3] + 0.3104856f * buffer[i * obj_->num_channels + ch];
-                coefficient[4] = 0.55000f * coefficient[4] + 0.5329522f * buffer[i * obj_->num_channels + ch];
-                coefficient[5] = -0.7616f * coefficient[5] - 0.0168980f * buffer[i * obj_->num_channels + ch];
-                rand_value = 1.1125f * 0.129f * (coefficient[0] + coefficient[1] + coefficient[2] + coefficient[3] + coefficient[4] + coefficient[5] + coefficient[6] + rand_value * 0.5362f);
-                coefficient[6] = buffer[i * obj_->num_channels + ch] * 0.115926f;
-                pcm = (int16_t)rand_value;
+                coefficient[0] = 0.99886f * coefficient[0] + 0.0555179f * pcm;
+                coefficient[1] = 0.99332f * coefficient[1] + 0.0750759f * pcm;
+                coefficient[2] = 0.96900f * coefficient[2] + 0.1538520f * pcm;
+                coefficient[3] = 0.86650f * coefficient[3] + 0.3104856f * pcm;
+                coefficient[4] = 0.55000f * coefficient[4] + 0.5329522f * pcm;
+                coefficient[5] = -0.7616f * coefficient[5] - 0.0168980f * pcm;
+                pcm = 1.1125f * 0.129f * (coefficient[0] + coefficient[1] + coefficient[2] + coefficient[3] + coefficient[4] + coefficient[5] + coefficient[6] + rand_value * 0.5362f);
+                coefficient[6] = pcm * 0.115926f;
+                buffer[ch][i] = (int16_t)pcm;
                 break;
             default:
-                pcm = 0;
+                buffer[ch][i] = 0.0f;
                 break;
             }
-            buffer[i * obj_->num_channels + ch] = pcm;
         }
         obj_->offset += sin_step;
     }
 	
 	obj_->offset = fmodf(obj_->offset, 2.0f * 3.141592f);
-
-	criAtomPlayer_SetData(player, buffer, obj_->length * obj_->num_channels * sizeof(int16_t));
+    ADXUtils::Interleave(buffer, obj_->buffer[obj_->index], obj_->num_channels, obj_->length);
+	criAtomPlayer_SetData(player, obj_->buffer[obj_->index].data(), obj_->length * obj_->num_channels * sizeof(int16_t));
 }
 
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
@@ -744,7 +744,11 @@ static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         }
 
         if (ImGui::BeginTabItem("Meter")) {
-            BusMeter();
+            if (ADXRuntime::GetBusNames().empty()) {
+                MasterOutMeter();
+            } else {
+                BusMeter();
+            }
             ImGui::EndTabItem();
         }
     }
@@ -756,7 +760,7 @@ static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
 static void BusMeter(void)
 {
-    int32_t ch, max_channels;
+    int32_t max_channels;
     std::vector<float> rms_values, peak_values, peak_hold_values;
     float histogram_width = 100.0f;
     float histogram_height = 300.0f;
@@ -810,7 +814,7 @@ static void BusMeter(void)
         /* チャンネル数に応じてフォントを 0.7～1.0 倍に縮小   */
         font_scale = ImClamp(1.0f - 0.05f * (max_channels - 1), 0.4f, 1.0f);
 
-        for (ch = 0; ch < max_channels; ch++) {
+        for (auto ch = 0; ch < max_channels; ch++) {
             const char* label = meter_label[ch].c_str();
             /* 各バーの矩形領域*/
             ImVec2 bar_size{ histogram_width / max_channels, histogram_height };
@@ -853,4 +857,97 @@ static void BusMeter(void)
         /* グループ化終了 */
         ImGui::EndGroup();
     }
+}
+
+static void MasterOutMeter(void)
+{
+    float rms_value, peak_value, peak_hold_value;
+    float histogram_width = 100.0f;
+    float histogram_height = 300.0f;
+    float padding_histogram_width = 30.0f;
+    ImFont* font = ImGui::GetFont();
+    float base_size = ImGui::GetFontSize();
+    ImDrawList* draw_list;
+    ImVec2 cursor_position;
+    ImVec2 base;
+    float font_scale;
+    std::map<int32_t, std::string> meter_label;
+    CriAtomLevelInfo level_info;
+    
+    criAtomExAsrRack_GetLevelInfo(CRIATOMEXASR_RACK_DEFAULT_ID, &level_info);
+    
+    meter_label = ADXUtils::GetSpeakerMappingLabel(criAtomExAsrRack_GetSpeakerMapping(CRIATOMEXASR_RACK_DEFAULT_ID));
+    
+    /* パディングサイズを最大チャンネル数から求める */
+    padding_histogram_width = level_info.num_channels * 10.0f;
+
+    /* パディングによりヒストグラム間を調整 */
+    ImGui::SameLine(0.0f, 50.0f);
+
+    /* ヒストグラム描画位置の高さ方向を固定 */
+    ImGui::SetCursorPosY(ImGui::GetWindowSize().y / 5.0f);
+
+    /* 描画対象リストを作成 */
+    draw_list = ImGui::GetWindowDrawList();
+
+    /* グループ化して表示 */
+    ImGui::BeginGroup();
+    
+    /* ヒストグラムの上に表示 */
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX());
+    ImGui::Text("%s", "MasterOut");
+
+    /* 現在のカーソル位置を取得 */
+    cursor_position = ImGui::GetCursorScreenPos();
+    base = ImGui::GetCursorScreenPos();
+
+    /* チャンネル数に応じてフォントを 0.7～1.0 倍に縮小   */
+    font_scale = ImClamp(1.0f - 0.05f * (level_info.num_channels - 1), 0.4f, 1.0f);
+    
+    for (auto ch = 0; ch < level_info.num_channels; ch++) {
+        const char* label = meter_label[ch].c_str();
+        /* 各バーの矩形領域*/
+        ImVec2 bar_size{ histogram_width / level_info.num_channels, histogram_height };
+        ImVec2 p0(base.x + ch * (bar_size.x + 6.0f), base.y);
+        ImVec2 p1(p0.x + bar_size.x, p0.y + bar_size.y);
+        ImVec2 fill0;
+        ImVec2 label_sz = { ImGui::CalcTextSize(label).x * font_scale, ImGui::CalcTextSize(label).y * font_scale };
+        float text_gap = 4.0f;
+        float hight_rms, hight_peak, hight_peak_hold;
+        float label_x = p0.x + (bar_size.x - label_sz.x) * 0.5f;
+        float label_y = p1.y + text_gap;
+
+        rms_value = ADXUtils::NormalizeDecibel(level_info.rms_levels[ch]);
+        peak_value = ADXUtils::NormalizeDecibel(level_info.peak_levels[ch]);
+        peak_hold_value = ADXUtils::NormalizeDecibel(level_info.peak_hold_levels[ch]);
+        
+        /* 背景 */
+        draw_list->AddRectFilled(p0, p1, IM_COL32(40, 40, 40, 255), 3.0f);
+
+        /* RMS（常時塗り） */
+        hight_rms = ADXUtils::NormalizeDecibel(ADXUtils::LevelToDecibel(rms_value)) * bar_size.y;
+        fill0 = ImVec2(p0.x, p1.y - hight_rms);
+        draw_list->AddRectFilled(fill0, p1, IM_COL32(0, 200, 0, 255), 3.0f, ImDrawFlags_RoundCornersBottom);
+
+        /* Peak（赤線）*/
+        hight_peak = ADXUtils::NormalizeDecibel(ADXUtils::LevelToDecibel(peak_value)) * bar_size.y;
+        draw_list->AddLine(ImVec2(p0.x, p1.y - hight_peak),
+            ImVec2(p1.x, p1.y - hight_peak),
+            IM_COL32(255, 100, 100, 255), 2.0f);
+
+        /* Peak‑Hold（黄線）*/
+        hight_peak_hold = ADXUtils::NormalizeDecibel(ADXUtils::LevelToDecibel(peak_hold_value)) * bar_size.y;
+        draw_list->AddLine(ImVec2(p0.x, p1.y - hight_peak_hold),
+            ImVec2(p1.x, p1.y - hight_peak_hold),
+            IM_COL32(255, 200, 40, 255), 2.0f);
+
+        /* ラベル（中央揃え・縮小フォント） --------------------*/
+        draw_list->AddText(font, base_size * font_scale,
+            ImVec2(label_x, label_y),
+            IM_COL32_WHITE, label);
+    }
+    /* パディング付きのヒストグラムを提示して次の描画位置を整える */
+    ImGui::Dummy(ImVec2(histogram_width + padding_histogram_width, histogram_height));
+    /* グループ化終了 */
+    ImGui::EndGroup();
 }

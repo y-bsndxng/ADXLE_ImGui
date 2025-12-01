@@ -28,6 +28,7 @@ void ADXRuntime::Initialize(const ADXRuntime::Config& config)
         ADXRuntime::dbas_id = criAtomExDbas_Create(&config.dbas_config, NULL, 0);
         criAtomEx_AttachPerformanceMonitor();
         criAtomEx_ResetPerformanceMonitor();
+        criAtomExAsrRack_AttachLevelMeter(CRIATOMEXASR_RACK_DEFAULT_ID, NULL, NULL, 0);
     }
 }
 
@@ -44,6 +45,7 @@ bool ADXRuntime::IsInitilaized(void)
 
 void ADXRuntime::Finalize(void)
 {
+    criAtomExAsrRack_DetachLevelMeter(CRIATOMEXASR_RACK_DEFAULT_ID);
     ADXRuntime::vp.DestroyAllVoicePool();
     ADXRuntime::player.DestroyAllPlayer();
     ADXRuntime::playback_ids.clear();
