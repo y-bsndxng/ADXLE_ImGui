@@ -140,15 +140,19 @@ std::tuple<bool, CriAtomExCueInfo> ADXRuntime::GetCueInfo(const char* name)
 
 std::tuple<bool, CriAtomExAcfDspBusInfo> ADXRuntime::GetBusInfo(const int32_t bus_index)
 {
-    CriSint32 num_buses = criAtomExAcf_GetNumBuses();
-    CriAtomExAcfDspBusInfo info { 0 };
-    bool result = false;
-    
-    if (num_buses > 0) {
-        criAtomExAcf_GetDspBusInformation((CriUint16)bus_index, &info);
+    auto [result, acf_info] = ADXRuntime::GetAcfInfo();
+    CriAtomExAcfDspBusInfo bus_info{ 0 };
+
+    if (result) {
+        CriSint32 num_buses = criAtomExAcf_GetNumBuses();
+
+        if (num_buses > 0) {
+            criAtomExAcf_GetDspBusInformation((CriUint16)bus_index, &bus_info);
+        }
+        return std::make_tuple(true, bus_info);
     }
-    
-    return std::make_tuple(result, info);
+
+    return std::make_tuple(false, bus_info);
 }
 
 std::vector<std::string> ADXRuntime::GetCueNames(void)
@@ -168,25 +172,28 @@ std::vector<std::string> ADXRuntime::GetCueNames(void)
 
 std::vector<std::string> ADXRuntime::GetBusNames(void)
 {
+    auto [result, acf_info] = ADXRuntime::GetAcfInfo();
     std::vector<std::string> names;
-    CriAtomExAcfDspSettingInfo setting_info;
-    CriAtomExAcfDspBusInfo bus_info;
-    CriSint32 num_settings = criAtomExAcf_GetNumDspSettings();
-    CriBool result;
-    
-    if (num_settings < 0) {
-        return names;
-    }
 
-    for (auto i = 0; i < num_settings; i++) {
-        result = criAtomExAcf_GetDspSettingInformation(criAtomExAcf_GetDspSettingNameByIndex((CriUint16)i), &setting_info);
-        if (result == CRI_FALSE) {
+    if (result) {
+        CriSint32 num_settings = criAtomExAcf_GetNumDspSettings();
+        CriAtomExAcfDspSettingInfo setting_info;
+        CriAtomExAcfDspBusInfo bus_info;
+
+        if (num_settings < 0) {
             return names;
         }
-        names.resize(setting_info.num_buses);
-        for (auto j = 0; j < setting_info.num_buses; j++) {
-            criAtomExAcf_GetDspBusInformation((CriUint16)j, &bus_info);
-            names.at(j) = bus_info.name;
+
+        for (auto i = 0; i < num_settings; i++) {
+            result = criAtomExAcf_GetDspSettingInformation(criAtomExAcf_GetDspSettingNameByIndex((CriUint16)i), &setting_info);
+            if (result == CRI_FALSE) {
+                return names;
+            }
+            names.resize(setting_info.num_buses);
+            for (auto j = 0; j < setting_info.num_buses; j++) {
+                criAtomExAcf_GetDspBusInformation((CriUint16)j, &bus_info);
+                names.at(j) = bus_info.name;
+            }
         }
     }
 

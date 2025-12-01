@@ -35,6 +35,20 @@ void ADXUtils::UserFreeFunc(void* obj, void* ptr)
 	free(ptr);
 }
 
+const char* ADXUtils::GetNoiseTypeString(const NoiseType noise_type)
+{
+    switch (noise_type) {
+    case NoiseType::Sin:
+        return "Sin";
+    case NoiseType::White:
+        return "White";
+    case NoiseType::Pink:
+        return "Pink";
+    default:
+        return "UNKNOWN";
+    }
+}
+
 const char* ADXUtils::GetVoiceTypeString(const VoiceType voice_type)
 {
 	switch (voice_type) {

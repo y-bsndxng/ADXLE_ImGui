@@ -431,6 +431,18 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     if (ImGui::TreeNode("PCM")) {
 		static float freq = 440.0f;
         static Player::DataRequestObj obj;
+        static int32_t selected_noise_index;
+        std::vector<std::string> noise_names;
+        std::vector<NoiseType> noise_types = {
+            NoiseType::Sin,
+            NoiseType::White,
+            NoiseType::Pink
+        };
+
+
+        std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
+        ImGuiUtils::Comboui("VoiceType", &selected_noise_index, &noise_names);
+        obj.noise_type = noise_types.at(selected_noise_index);
 		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
 
 		if (ImGui::Button("Set")) {
@@ -501,7 +513,18 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         criAtomExPlayer_SetAisacControlById(player, aisac_cointrol_id, aisac_control_value);
         ImGui::TreePop();
     }
-    ImGui::Separator();
+    if (ADXRuntime::GetBusNames().size() > 0) {
+        ImGui::Separator();
+        if (ImGui::TreeNode("Set Bus Send Level Offset")) {
+            auto bus_names = ADXRuntime::GetBusNames();
+            static int32_t selected_bus_index = 0;
+            static float bus_send_level = 0.0f;
+            ImGuiUtils::Comboui("Player", &selected_player_index, &player_names);
+            ImGui::SliderFloat("Bus Send Level", &bus_send_level, 0.0f, 1.0f);
+            criAtomExPlayer_SetBusSendLevelOffsetByName(player, bus_names.at(selected_bus_index).c_str(), bus_send_level);
+            ImGui::TreePop();
+        }
+    }
     if (ImGui::TreeNode("Playback")) {
         if (ImGui::BeginTable("PlaybackTable", 4, flags)) {
             ImGui::TableSetupColumn("Playback ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
@@ -568,16 +591,43 @@ static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayer
     Player::DataRequestObj* obj_ = (Player::DataRequestObj*)obj;
 	float sin_step = 2.0f * 3.141592f * obj_->frequency / obj_->sampling_rate;
     int16_t* buffer;
-
+ 
 	UNUSED(id);
     
     obj_->index++;
     obj_->index %= 2;
     buffer = obj_->buffer[obj_->index].data();
-    
-    for (auto ch = 0; ch < obj_->num_channels; ch++) {
-        for (auto i = 0; i < obj_->length; i++) {
-            buffer[i * obj_->num_channels + ch] = (int16_t)(sinf(obj_->offset) * 32767.0f);
+
+    for (auto i = 0; i < obj_->length; i++) {
+        for (auto ch = 0; ch < obj_->num_channels; ch++) {
+            CriFloat32 coefficient[7] = { 0 };
+            float rand_value = 0.0f;
+            int16_t pcm;
+            switch (obj_->noise_type) {
+            case NoiseType::Sin:
+                pcm = (int16_t)(sinf(obj_->offset) * 32767.0f);
+                break;
+            case NoiseType::White:
+                rand_value = (float)rand();
+                pcm = (int16_t)(sinf(2.0f) * 32767.0f * rand_value / RAND_MAX);
+                break;
+            case NoiseType::Pink:
+                rand_value = rand() / (RAND_MAX / 2.0f) - 1.0f;
+                coefficient[0] = 0.99886f * coefficient[0] + 0.0555179f * buffer[i * obj_->num_channels + ch];
+                coefficient[1] = 0.99332f * coefficient[1] + 0.0750759f * buffer[i * obj_->num_channels + ch];
+                coefficient[2] = 0.96900f * coefficient[2] + 0.1538520f * buffer[i * obj_->num_channels + ch];
+                coefficient[3] = 0.86650f * coefficient[3] + 0.3104856f * buffer[i * obj_->num_channels + ch];
+                coefficient[4] = 0.55000f * coefficient[4] + 0.5329522f * buffer[i * obj_->num_channels + ch];
+                coefficient[5] = -0.7616f * coefficient[5] - 0.0168980f * buffer[i * obj_->num_channels + ch];
+                rand_value = 1.1125f * 0.129f * (coefficient[0] + coefficient[1] + coefficient[2] + coefficient[3] + coefficient[4] + coefficient[5] + coefficient[6] + rand_value * 0.5362f);
+                coefficient[6] = buffer[i * obj_->num_channels + ch] * 0.115926f;
+                pcm = (int16_t)rand_value;
+                break;
+            default:
+                pcm = 0;
+                break;
+            }
+            buffer[i * obj_->num_channels + ch] = pcm;
         }
         obj_->offset += sin_step;
     }
@@ -596,8 +646,6 @@ static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     auto [result, bus_info] = ADXRuntime::GetBusInfo(selected_bus_index);
     auto info = ADXRuntime::GetPerformanceInfo();
     auto bus_names = ADXRuntime::GetBusNames();
-
-
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
@@ -714,7 +762,7 @@ static void BusMeter(void)
     float histogram_height = 300.0f;
     float padding_histogram_width = 30.0f;
     ImFont* font = ImGui::GetFont();
-    float   base_size = ImGui::GetFontSize();
+    float base_size = ImGui::GetFontSize();
     auto bus_names = ADXRuntime::GetBusNames();
     
     for (auto i = 0; i < bus_names.size(); i++) {

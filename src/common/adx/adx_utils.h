@@ -13,6 +13,7 @@ void UserErrorCallBackFunc(const CriChar8* errid, CriUint32 p1, CriUint32 p2, Cr
 std::string GetErrorMessage(void);
 void* UserAllocFunc(void* obj, CriUint32 size);
 void UserFreeFunc(void* obj, void* ptr);
+const char* GetNoiseTypeString(const NoiseType noise_type);
 const char* GetVoiceTypeString(const VoiceType voice_type);
 const char* GetPlayerStatusString(const CriAtomExPlayerHn player);
 const char* GetPanTypeString(const CriAtomExPanType pan_type);

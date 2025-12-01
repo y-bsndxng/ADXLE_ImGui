@@ -28,6 +28,12 @@ enum class VoiceType : std::uint8_t {
     Wave
 };
 
+enum class NoiseType : std::uint8_t {
+    Sin,
+    White,
+    Pink
+};
+
 class VoicePool {
 public:
     struct Config {
@@ -61,6 +67,7 @@ public:
     struct DataRequestObj {
         DataRequestObj();
         ~DataRequestObj() {};
+        NoiseType noise_type;
         int32_t index;
         int32_t num_channels;
         int32_t length;
