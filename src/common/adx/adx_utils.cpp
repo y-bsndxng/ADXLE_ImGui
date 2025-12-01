@@ -233,3 +233,29 @@ void ADXUtils::Deinterleave(
         }
     }
 }
+
+float ADXUtils::Int16ToFloat(int16_t s)
+{
+    return (float)s / INT16_MAX;
+}
+
+int16_t ADXUtils::FloatToInt16(float x)
+{
+    // 念のためクリップ（オーバーフロー防止）
+    if (x >  1.0f) x =  1.0f;
+    if (x < -1.0f) x = -1.0f;
+
+    // -1.0 ～ 1.0 を -32768 ～ 32767 にマッピング
+    // 正側の最大値は 32767 に合わせるのがよくあるパターン
+    float scaled = x * 32767.0f;
+
+    // 四捨五入してからキャスト
+    // C++17 以降なら std::lroundf などを使っても良いです
+    int32_t v = static_cast<int32_t>(scaled + (scaled >= 0 ? 0.5f : -0.5f));
+
+    // 念のため再度クリップ
+    if (v > INT16_MAX) v = INT16_MAX;
+    if (v < INT16_MIN) v = INT16_MIN;
+
+    return static_cast<int16_t>(v);
+}

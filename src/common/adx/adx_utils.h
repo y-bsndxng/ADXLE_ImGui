@@ -23,4 +23,6 @@ float LevelToDecibel(float value);
 float NormalizeDecibel(float decibel);
 void Interleave(const std::vector<std::vector<int16_t>>& src, std::vector<int16_t>& dst, const int32_t max_channels, const int32_t max_samples);
 void Deinterleave(const std::vector<int16_t>& src, std::vector<std::vector<int16_t>>& dst, const int32_t max_channels, const int32_t max_samples);
+float Int16ToFloat(int16_t s);
+int16_t FloatToInt16(float x);
 }

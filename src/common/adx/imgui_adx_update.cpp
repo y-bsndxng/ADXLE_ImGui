@@ -603,14 +603,16 @@ static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayer
     for (auto i = 0; i < obj_->length; i++) {
         for (auto ch = 0; ch < obj_->num_channels; ch++) {
             float rand_value = 0.0f;
-            float pcm = (float)buffer[ch][i];
+            float pcm = ADXUtils::Int16ToFloat(buffer[ch][i]);
             switch (obj_->noise_type) {
             case NoiseType::Sin:
-                buffer[ch][i] = (int16_t)(sinf(obj_->offset) * 32767.0f);
+                pcm = sinf(obj_->offset);
+                buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
                 break;
             case NoiseType::White:
                 rand_value = (float)rand();
-                buffer[ch][i] = (int16_t)(sinf(2.0f) * 32767.0f * rand_value / RAND_MAX);
+                pcm = (int16_t)(sinf(2.0f) * 3.141592f * rand_value / RAND_MAX);
+                buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
                 break;
             case NoiseType::Pink:
                 rand_value = rand() / (RAND_MAX / 2.0f) - 1.0f;
@@ -622,10 +624,10 @@ static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayer
                 coefficient[5] = -0.7616f * coefficient[5] - 0.0168980f * pcm;
                 pcm = 1.1125f * 0.129f * (coefficient[0] + coefficient[1] + coefficient[2] + coefficient[3] + coefficient[4] + coefficient[5] + coefficient[6] + rand_value * 0.5362f);
                 coefficient[6] = pcm * 0.115926f;
-                buffer[ch][i] = (int16_t)pcm;
+                buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
                 break;
             default:
-                buffer[ch][i] = 0.0f;
+                buffer[ch][i] = 0;
                 break;
             }
         }
