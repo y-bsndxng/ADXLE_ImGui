@@ -70,7 +70,7 @@ public:
         NoiseType noise_type;
         int32_t index;
         int32_t num_channels;
-        int32_t length;
+        int32_t num_samples;
         int32_t sampling_rate;
         int32_t frequency;
         float offset;

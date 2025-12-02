@@ -447,11 +447,12 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
 		if (ImGui::Button("Set")) {
             obj.frequency = (int32_t)freq;
+            obj.index = 0;
 	        criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
             criAtomExPlayer_SetNumChannels(player, obj.num_channels);
 	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
 	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
-            criAtomExPlayer_SetData(player, obj.buffer[0].data(), obj.length * obj.num_channels * sizeof(int16_t));
+            criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Unet")) {
@@ -589,54 +590,51 @@ static void PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
 static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayerHn player)
 {
-    Player::DataRequestObj* obj_ = (Player::DataRequestObj*)obj;
-	float sin_step = 2.0f * 3.141592f * obj_->frequency / obj_->sampling_rate;
-    std::vector<std::vector<int16_t>> buffer(obj_->num_channels, std::vector<int16_t>(obj_->length, 0));
+    Player::DataRequestObj* request_obj = (Player::DataRequestObj*)obj;
+	float sin_step = 2.0f * 3.141592f * request_obj->frequency / request_obj->sampling_rate;
+    std::vector<std::vector<int16_t>> buffer(request_obj->num_channels, std::vector<int16_t>(request_obj->num_samples, 0));
     float coefficient[7] = { 0 };
     
 	UNUSED(id);
     
-    obj_->index++;
-    obj_->index %= 2;
-    ADXUtils::Deinterleave(obj_->buffer[obj_->index], buffer, obj_->num_channels, obj_->length);
+    request_obj->index++;
+    request_obj->index %= 2;
 
-    for (auto i = 0; i < obj_->length; i++) {
-        for (auto ch = 0; ch < obj_->num_channels; ch++) {
-            float rand_value = 0.0f;
-            float pcm = ADXUtils::Int16ToFloat(buffer[ch][i]);
-            switch (obj_->noise_type) {
+    std::fill(request_obj->buffer[request_obj->index].begin(), request_obj->buffer[request_obj->index].end(), static_cast<int16_t>(0));
+    ADXUtils::Deinterleave(request_obj->buffer[request_obj->index], buffer, request_obj->num_channels, request_obj->num_samples);
+
+    for (auto i = 0; i < request_obj->num_samples; i++) {
+        for (auto ch = 0; ch < request_obj->num_channels; ch++) {
+            float pcm = 0.0f;
+            switch (request_obj->noise_type) {
             case NoiseType::Sin:
-                pcm = sinf(obj_->offset);
-                buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
+                pcm = sinf(request_obj->offset);
+                request_obj->offset += sin_step;
                 break;
             case NoiseType::White:
-                rand_value = (float)rand();
-                pcm = (int16_t)(sinf(2.0f) * 3.141592f * rand_value / RAND_MAX);
-                buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
+                pcm = (float)rand();
+                pcm = (sinf(2.0f) * 3.141592f * pcm) / RAND_MAX;
                 break;
             case NoiseType::Pink:
-                rand_value = rand() / (RAND_MAX / 2.0f) - 1.0f;
                 coefficient[0] = 0.99886f * coefficient[0] + 0.0555179f * pcm;
                 coefficient[1] = 0.99332f * coefficient[1] + 0.0750759f * pcm;
                 coefficient[2] = 0.96900f * coefficient[2] + 0.1538520f * pcm;
                 coefficient[3] = 0.86650f * coefficient[3] + 0.3104856f * pcm;
                 coefficient[4] = 0.55000f * coefficient[4] + 0.5329522f * pcm;
                 coefficient[5] = -0.7616f * coefficient[5] - 0.0168980f * pcm;
-                pcm = 1.1125f * 0.129f * (coefficient[0] + coefficient[1] + coefficient[2] + coefficient[3] + coefficient[4] + coefficient[5] + coefficient[6] + rand_value * 0.5362f);
+                pcm = 1.1125f * 0.129f * (coefficient[0] + coefficient[1] + coefficient[2] + coefficient[3] + coefficient[4] + coefficient[5] + coefficient[6] + (rand() / ((float)RAND_MAX / 2.0f) - 1.0f) * 0.5362f);
                 coefficient[6] = pcm * 0.115926f;
-                buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
                 break;
             default:
-                buffer[ch][i] = 0;
                 break;
             }
+            buffer[ch][i] = ADXUtils::FloatToInt16(pcm);
         }
-        obj_->offset += sin_step;
     }
 	
-	obj_->offset = fmodf(obj_->offset, 2.0f * 3.141592f);
-    ADXUtils::Interleave(buffer, obj_->buffer[obj_->index], obj_->num_channels, obj_->length);
-	criAtomPlayer_SetData(player, obj_->buffer[obj_->index].data(), obj_->length * obj_->num_channels * sizeof(int16_t));
+	request_obj->offset = fmodf(request_obj->offset, 2.0f * 3.141592f);
+    ADXUtils::Interleave(buffer, request_obj->buffer[request_obj->index], request_obj->num_channels, request_obj->num_samples);
+	criAtomPlayer_SetData(player, request_obj->buffer[request_obj->index].data(), request_obj->num_samples * request_obj->num_channels * sizeof(int16_t));
 }
 
 static void MixerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)

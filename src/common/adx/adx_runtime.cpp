@@ -360,13 +360,15 @@ Player::Config::Config()
 
 Player::DataRequestObj::DataRequestObj()
 {
-    this->length = 1024;
+    this->noise_type = NoiseType::Sin;
+    this->index = 0;
+    this->num_samples = 1024;
     this->sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
     this->num_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
     this->frequency = 0;
     this->offset = 0.0f;
-    this->buffer[0].resize(this->num_channels * this->length);
-    this->buffer[1].resize(this->num_channels * this->length);
+    this->buffer[0].resize(this->num_channels * this->num_samples);
+    this->buffer[1].resize(this->num_channels * this->num_samples);
 }
 
 void Player::Player::CreatePlayer(const Player::Config& config)
