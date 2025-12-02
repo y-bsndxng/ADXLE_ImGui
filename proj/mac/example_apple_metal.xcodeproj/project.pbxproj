@@ -129,7 +129,8 @@
 				139970482EC9A47200B35EC9 /* ImGuiFileDialog.cpp */,
 				139970492EC9A47200B35EC9 /* ImGuiFileDialogConfig.h */,
 			);
-			path = imgui_filedialog;
+			name = imgui_filedialog;
+			path = ../../external/imgui_filedialog;
 			sourceTree = "<group>";
 		};
 		1399704F2EC9A76300B35EC9 /* common */ = {
@@ -138,7 +139,8 @@
 				1399705A2EC9A7A600B35EC9 /* imgui_utils */,
 				139970502EC9A78A00B35EC9 /* adx */,
 			);
-			path = common;
+			name = common;
+			path = ../../src/common;
 			sourceTree = "<group>";
 		};
 		139970502EC9A78A00B35EC9 /* adx */ = {
@@ -159,7 +161,8 @@
 				13BE9DF92ED877BA00727B74 /* imgui_utils.mm */,
 				130BBBB52ECC9D5C00A5475A /* imgui_utils.hpp */,
 			);
-			path = imgui_utils;
+			name = imgui_utils;
+			path = ../../src/common/imgui_utils;
 			sourceTree = "<group>";
 		};
 		8307E7B520E9F9C700473790 = {
