@@ -96,6 +96,21 @@
     <ClCompile Include="..\..\src\common\imgui_utils\imgui_utils.cpp">
       <Filter>common\imgui_utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_file.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_info.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_mixer.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_player.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\adx\imgui_adx_voicepool.cpp">
+      <Filter>common\adx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\external\imgui\LICENSE.txt">
