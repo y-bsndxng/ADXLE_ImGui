@@ -47,7 +47,7 @@ void ADXRuntime::Finalize(void)
 {
     criAtomExAsrRack_DetachLevelMeter(CRIATOMEXASR_RACK_DEFAULT_ID);
     ADXRuntime::vp.DestroyAllVoicePool();
-    ADXRuntime::player.DestroyAllPlayer();
+    ADXRuntime::player.Destroy();
     ADXRuntime::playback_ids.clear();
     ADXRuntime::UnloadFile();
     
@@ -303,6 +303,11 @@ void ADXRuntime::ResetPerformanceInfo(const CriAtomExAsrRackId rack_id)
     criAtomExAsrRack_ResetPerformanceMonitor(rack_id);
 }
 
+void SetPlayerPantype(const int32_t player_index, const CriAtomExPanType pan_type)
+{
+    
+}
+
 VoicePool::Config::Config()
 {
     criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&this->standard_config);
@@ -379,7 +384,7 @@ Player::DataRequestObj::DataRequestObj()
     this->buffer[1].resize(this->num_channels * this->num_samples);
 }
 
-void Player::Player::CreatePlayer(const Player::Config& config)
+void Player::Player::Create(const Player::Config& config)
 {
     this->num_players = config.num_players;
     this->players.resize(this->num_players);
@@ -401,7 +406,7 @@ void Player::Player::CreatePlayer(const Player::Config& config)
     assert((size_t)this->num_players == this->listeners.size());
 }
 
-void Player::Player::DestroyAllPlayer(void)
+void Player::Player::Destroy(void)
 {
     for (const auto& player : this->players) {
         criAtomExPlayer_Set3dSourceHn(player, NULL);
@@ -422,7 +427,50 @@ void Player::Player::DestroyAllPlayer(void)
     this->listeners.clear();
 }
 
-CriAtomExPlayerHn Player::GetPlayerHn(const int32_t& player_index)
+void Player::Update(const int32_t player_index)
+{
+    auto player = Player::GetPlayerHn(player_index);
+    auto source = this->sources.at(player_index);
+    auto listener = this->listeners.at(player_index);
+    criAtomEx3dSource_Update(source);
+    criAtomEx3dListener_Update(listener);
+    criAtomExPlayer_UpdateAll(player);
+}
+
+void Player::SetPanType(const int32_t player_index, const CriAtomExPanType type)
+{
+    auto player = Player::GetPlayerHn(player_index);
+    
+    if (type == CRIATOMEX_PAN_TYPE_3D_POS) {
+        auto source = this->sources.at(player_index);
+        auto listener = this->listeners.at(player_index);
+        criAtomExPlayer_Set3dSourceHn(player, source);
+        criAtomExPlayer_Set3dListenerHn(player, listener);
+    } else {
+        criAtomExPlayer_Set3dSourceHn(player, NULL);
+        criAtomExPlayer_Set3dListenerHn(player, NULL);
+    }
+}
+
+void Player::SetSourcePosition(const int32_t player_index, const CriAtomExVector position)
+{
+    auto source = this->sources.at(player_index);
+    criAtomEx3dSource_SetPosition(source, &position);
+}
+
+void Player::SetListenerPosition(const int32_t player_index, const CriAtomExVector position)
+{
+    auto listener = this->listeners.at(player_index);
+    criAtomEx3dListener_SetPosition(listener, &position);
+}
+
+void Player::SetListenerOrientation(const int32_t player_index, const CriAtomExVector front, const CriAtomExVector top)
+{
+    auto listener = this->listeners.at(player_index);
+    criAtomEx3dListener_SetOrientation(listener, &front, &top);
+}
+
+CriAtomExPlayerHn Player::GetPlayerHn(const int32_t player_index)
 {
     auto player = this->players.at(player_index);
 

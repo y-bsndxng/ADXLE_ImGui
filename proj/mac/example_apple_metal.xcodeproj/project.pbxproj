@@ -164,9 +164,6 @@
 		139970502EC9A78A00B35EC9 /* adx */ = {
 			isa = PBXGroup;
 			children = (
-				13CDBD2A2EDFBAA800DE3682 /* adx_runtime.h */,
-				13CDBD2B2EDFBAA800DE3682 /* adx_utils.h */,
-				13CDBD2C2EDFBAA800DE3682 /* imgui_adx.h */,
 				13CDBD2D2EDFBAA800DE3682 /* imgui_adx_file.cpp */,
 				13CDBD2E2EDFBAA800DE3682 /* imgui_adx_info.cpp */,
 				13CDBD2F2EDFBAA800DE3682 /* imgui_adx_mixer.cpp */,
@@ -175,8 +172,11 @@
 				130BBBB62ECC9D6F00A5475A /* imgui_adx_finalize.cpp */,
 				130BBBB72ECC9D6F00A5475A /* imgui_adx_update.cpp */,
 				139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */,
+				13CDBD2C2EDFBAA800DE3682 /* imgui_adx.h */,
 				139970512EC9A7A200B35EC9 /* adx_runtime.cpp */,
+				13CDBD2A2EDFBAA800DE3682 /* adx_runtime.h */,
 				139970522EC9A7A200B35EC9 /* adx_utils.cpp */,
+				13CDBD2B2EDFBAA800DE3682 /* adx_utils.h */,
 			);
 			path = adx;
 			sourceTree = "<group>";

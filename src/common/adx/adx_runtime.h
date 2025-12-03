@@ -72,16 +72,21 @@ public:
         int32_t num_channels;
         int32_t num_samples;
         int32_t sampling_rate;
-        int32_t frequency;
+        float frequency;
         float offset;
         std::vector<int16_t> buffer[2];
     };
     Player() {};
     ~Player() {};
     int32_t num_players = 0;
-    void CreatePlayer(const Player::Config& config);
-    void DestroyAllPlayer(void);
-    CriAtomExPlayerHn GetPlayerHn(const int32_t& player_index);
+    void Create(const Player::Config& config);
+    void Destroy(void);
+    void Update(const int32_t player_index);
+    void SetPanType(const int32_t player_index, const CriAtomExPanType type);
+    void SetSourcePosition(const int32_t player_index, const CriAtomExVector position);
+    void SetListenerPosition(const int32_t player_index, const CriAtomExVector position);
+    void SetListenerOrientation(const int32_t player_index, const CriAtomExVector front, const CriAtomExVector top);
+    CriAtomExPlayerHn GetPlayerHn(const int32_t player_index);
 private:
     std::vector<CriAtomExPlayerHn> players;
     std::vector<CriAtomEx3dSourceHn> sources;

@@ -14,9 +14,11 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     auto cue_names = ADXRuntime::GetCueNames();
     std::vector<std::string> player_names;
     CriAtomExPlayerHn player;
+    static Player::DataRequestObj obj;
 	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
+    static bool is_cue = (!cue_names.empty()) ? true : false;
 
     player_names.resize(ADXRuntime::player.num_players);
 	for (int32_t i = 0; i < ADXRuntime::player.num_players; i++) {
@@ -45,6 +47,18 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	}
     ImGui::Separator();
     if (ImGui::Button("Start")) {
+        if (is_cue) {
+            auto cue_name = cue_names.at(selected_cue_index).c_str();
+            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name);
+        } else {
+            obj.index = 0;
+            criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
+            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
+            criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
+            criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
+            std::fill(obj.buffer[obj.index].begin(), obj.buffer[obj.index].end(), static_cast<int16_t>(0));
+            criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
+        }
         ADXRuntime::playback_ids.push_back(criAtomExPlayer_Start(player));
     }
     ImGui::SameLine();
@@ -57,7 +71,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     }
     ImGui::SameLine();
     if (ImGui::Button("Update")) {
-        criAtomExPlayer_UpdateAll(player);
+        ADXRuntime::player.Update(selected_player_index);
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset")) {
@@ -78,7 +92,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::SameLine();
     ImGui::Checkbox("Auto Update", &is_auto_update);
     if (is_auto_update != false) {
-        criAtomExPlayer_UpdateAll(player);
+        ADXRuntime::player.Update(selected_player_index);
     }
     ImGui::SameLine();
     ImGui::Checkbox("Loop Play", &is_loop);
@@ -88,17 +102,14 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::Separator();
     if (ImGui::TreeNode("Cue")) {
         if (!cue_names.empty()) {
-            const char* cue_name;
             ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
-            cue_name = cue_names.at(selected_cue_index).c_str();
-            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name);
+            is_cue = true;
         }
         ImGui::TreePop();
     }
     ImGui::Separator();
     if (ImGui::TreeNode("PCM")) {
 		static float freq = 220.0f;
-        static Player::DataRequestObj obj;
         static int32_t selected_noise_index;
         std::vector<std::string> noise_names;
         std::vector<NoiseType> noise_types = {
@@ -106,27 +117,13 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             NoiseType::White,
             NoiseType::Pink
         };
+        is_cue = false;
 
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
         ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
-        obj.noise_type = noise_types.at(selected_noise_index);
 		ImGui::SliderFloat("input freq", &freq, 0.0f, 1000.0f);
-
-		if (ImGui::Button("Set")) {
-            obj.frequency = (int32_t)freq;
-            obj.index = 0;
-	        criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
-            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
-	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
-	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
-            std::fill(obj.buffer[obj.index].begin(), obj.buffer[obj.index].end(), static_cast<int16_t>(0));
-            criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Unet")) {
-            criAtomExPlayer_Stop(player);
-	        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
-		}
+        obj.noise_type = noise_types.at(selected_noise_index);
+        obj.frequency = freq;
 
 		ImGui::TreePop();
 	}
@@ -162,8 +159,8 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         static float pan3d_angle = 0.0f;
         static float pan3d_elevation = 0.0f;
         static float pan3d_distance = 1.0f;
-
-        criAtomExPlayer_SetPanType(player, CRIATOMEX_PAN_TYPE_PAN3D);
+        
+        ADXRuntime::player.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_PAN3D);
 
         ImGui::SliderFloat("Pan3d Angle", &pan3d_angle, -180.0f, 180.0f);
         ImGui::SliderFloat("Pan3d Elevation", &pan3d_elevation, -180.0f, 180.0f);
@@ -172,6 +169,91 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         criAtomExPlayer_SetPan3dElevation(player, pan3d_elevation);
         criAtomExPlayer_SetPan3dInteriorDistance(player, pan3d_distance);
 
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("3D Pos")) {
+        static int32_t selected_orientation_index = 0;
+        std::unordered_map<std::string, std::pair<CriAtomExVector, CriAtomExVector>> orientation_list = {
+            {"Forward", {{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Backward", {{0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Left", {{-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Right", {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Up", {{0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}}},
+            {"Down", {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}},
+        };
+        std::vector<std::string> orientation_names;
+        static CriAtomExVector source_pos { 0.0f, 0.0f, 1.0f };
+        static CriAtomExVector listener_pos { 0.0f, 0.0f, 1.0f };
+        static CriAtomExVector listener_front { 0.0f, 0.0f, 1.0f };
+        static CriAtomExVector listener_top { 0.0f, 0.0f, 1.0f };
+        static float min_dist = 0.0f, max_dist = 10.0f;
+
+        std::transform(orientation_list.begin(), orientation_list.end(), std::back_inserter(orientation_names),[](const auto& v) { return v.first; });
+
+        ADXRuntime::player.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_3D_POS);
+
+        if (!cue_names.empty()) {
+            auto [result, info] = ADXRuntime::GetCueInfo(cue_names.at(selected_cue_index).c_str());
+            switch (info.pan_type) {
+                case CRIATOMEX_PAN_TYPE_3D_POS:
+                    min_dist = info.pos3d_info.min_distance;
+                    max_dist = info.pos3d_info.max_distance;
+                    break;
+                default:
+                    min_dist = 1.0f;
+                    max_dist = 10.0f;
+                    break;
+            }
+        }
+
+        ImGui::SeparatorText("Source");
+        ImGui::SliderFloat("source x", &source_pos.x, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("source y", &source_pos.y, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("source z", &source_pos.z, -1.0f * max_dist, max_dist);
+        ImGui::InputFloat("Min Distance", &min_dist);
+        ImGui::InputFloat("Max Distance", &max_dist);
+
+        if (ImGui::Button("Random Source Position")) {
+            source_pos.x = (float)rand() / RAND_MAX;
+            source_pos.y = (float)rand() / RAND_MAX;
+            source_pos.z = (float)rand() / RAND_MAX;
+        }
+        if (ImGui::Button("Reset Source Position")) {
+            source_pos.x = 0.0f;
+            source_pos.y = 0.0f;
+            source_pos.z = 1.0f;
+        }
+        
+        ImGui::SeparatorText("Listener");
+        ImGui::Text("Position");
+        ImGui::SliderFloat("listener x", &listener_pos.x, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("listener y", &listener_pos.y, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("listener z", &listener_pos.z, -1.0f * max_dist, max_dist);
+        
+        ImGui::Text("Orientation");
+        ImGuiUtils::Comboui("Orientation", &selected_orientation_index, &orientation_names);
+        listener_front = orientation_list[orientation_names.at(selected_orientation_index)].first;
+        listener_top = orientation_list[orientation_names.at(selected_orientation_index)].second;
+        
+        if (ImGui::Button("Random Listener Position")) {
+            auto rand_index = rand() % orientation_names.size();
+            listener_pos.x = (float)rand() / RAND_MAX;
+            listener_pos.y = (float)rand() / RAND_MAX;
+            listener_pos.z = (float)rand() / RAND_MAX;
+            selected_orientation_index = static_cast<int32_t>(rand_index);
+        }
+        if (ImGui::Button("Reset Listener Position")) {
+            listener_pos.x = 0.0f;
+            listener_pos.y = 0.0f;
+            listener_pos.z = 0.0f;
+            selected_orientation_index = 0;
+        }
+        
+        ADXRuntime::player.SetSourcePosition(selected_player_index, source_pos);
+        ADXRuntime::player.SetListenerPosition(selected_player_index, listener_pos);
+        ADXRuntime::player.SetListenerOrientation(selected_player_index, listener_front, listener_top);
+        
         ImGui::TreePop();
     }
     ImGui::Separator();
@@ -195,6 +277,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             ImGui::TreePop();
         }
     }
+    ImGui::Separator();
     if (ImGui::TreeNode("Playback")) {
         if (ImGui::BeginTable("PlaybackTable", 4, flags)) {
             ImGui::TableSetupColumn("Playback ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);

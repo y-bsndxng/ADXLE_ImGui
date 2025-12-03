@@ -8,10 +8,17 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	static char acf_file[path_length] = "";
 	static char acb_file[path_length] = "";
 	static char awb_file[path_length] = "";
-	static const std::vector<CriAtomExThreadModel> thread_models{ CRIATOMEX_THREAD_MODEL_MULTI_WITH_SONICSYNC, CRIATOMEX_THREAD_MODEL_MULTI, CRIATOMEX_THREAD_MODEL_MULTI_USER_DRIVEN, CRIATOMEX_THREAD_MODEL_USER_MULTI, CRIATOMEX_THREAD_MODEL_SINGLE };
-	static const std::vector<std::string> thread_models_items{ "MULTI_WITH_SONICSYNC", "MULTI", "USER_DRIVEN", "USER_MULTI", "SINGLE" };
+    const std::vector<CriAtomExThreadModel> thread_models{ CRIATOMEX_THREAD_MODEL_MULTI_WITH_SONICSYNC, CRIATOMEX_THREAD_MODEL_MULTI, CRIATOMEX_THREAD_MODEL_MULTI_USER_DRIVEN, CRIATOMEX_THREAD_MODEL_USER_MULTI, CRIATOMEX_THREAD_MODEL_SINGLE };
 	static int32_t selected_thread_model_index = 0;
+    const std::vector<std::string> thread_models_items{ "MULTI_WITH_SONICSYNC", "MULTI", "USER_DRIVEN", "USER_MULTI", "SINGLE" };
+    const std::vector<CriAtomSpeakerMapping> speaker_mappings{ CRIATOM_SPEAKER_MAPPING_AUTO, CRIATOM_SPEAKER_MAPPING_MONO, CRIATOM_SPEAKER_MAPPING_STEREO, CRIATOM_SPEAKER_MAPPING_5_1, CRIATOM_SPEAKER_MAPPING_7_1, CRIATOM_SPEAKER_MAPPING_5_1_2, CRIATOM_SPEAKER_MAPPING_7_1_2, CRIATOM_SPEAKER_MAPPING_7_1_4, CRIATOM_SPEAKER_MAPPING_7_1_4_4 };
+    const std::vector<std::string> speaker_mapping_items{ "AUTO", "MONO", "STEREO", "5_1", "7_1", "5_1_2", "7_1_2", "7_1_4", "7_1_4_4" };
+    static int32_t selected_speaker_mapping_index = 0;
+    const std::vector<CriAtomSoundRendererType> sound_renderer_types{ CRIATOM_SOUND_RENDERER_NATIVE, CRIATOM_SOUND_RENDERER_SPATIAL };
+    const std::vector<std::string> sound_renderer_items{ "NATIVE", "SPATIAL" };
+    static int32_t selected_sound_renderer_type_index = 0;
 	static int32_t num_sampling_rate = CRIATOM_DEFAULT_OUTPUT_SAMPLING_RATE;
+    static int32_t num_output_channels = CRIATOM_DEFAULT_OUTPUT_CHANNELS;
 	static int32_t num_voice = 64;
 	static int32_t num_virtual_voice = 256;
 	static int32_t num_players = 5;
@@ -65,11 +72,14 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	}
 
 	ImGui::Separator();
+    ImGuiUtils::Comboui("SpeakerMapping", &selected_speaker_mapping_index, &speaker_mapping_items);
+    ImGuiUtils::Comboui("SoundRendererType", &selected_sound_renderer_type_index, &sound_renderer_items);
 	ImGuiUtils::Comboui("ThreadModel", &selected_thread_model_index, &thread_models_items);
 	ImGui::SliderInt("Number of Sampling Rate", &num_sampling_rate, 0, 192000);
+    ImGui::SliderInt("Number of Output Channels", &num_output_channels, 2, 16);
 	ImGui::SliderInt("Number of Voice", &num_voice, 1, 256);
 	ImGui::SliderInt("Number of Virtual Voice", &num_virtual_voice, 1, 256);
-	ImGui::SliderInt("Number of Player", &num_players, 1, 10);
+    ImGui::InputInt("Number of Player", &num_players);
 
 	if (ImGui::Button("Initialize")) {
 		ADXRuntime::Config config;
@@ -93,7 +103,10 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		config.specific_config.asr.output_sampling_rate = num_sampling_rate;
 		config.specific_config.hca_mx.max_sampling_rate = num_sampling_rate;
 		config.specific_config.atom_ex.max_virtual_voices = num_virtual_voice;
-		config.specific_config.atom_ex.thread_model = thread_models[selected_thread_model_index];
+        config.specific_config.atom_ex.thread_model = thread_models.at(selected_thread_model_index);
+        config.specific_config.asr.speaker_mapping = speaker_mappings.at(selected_speaker_mapping_index);
+		config.specific_config.asr.sound_renderer_type = sound_renderer_types.at(selected_sound_renderer_type_index);
+        config.specific_config.asr.output_channels = num_output_channels;
 
 		/* 初期化 */
 		ADXRuntime::Initialize(config);
@@ -120,7 +133,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 		player_config.num_players = num_players;
 
         ADXRuntime::vp.CreateVoicePool(voicepool_config);
-		ADXRuntime::player.CreatePlayer(player_config);
+		ADXRuntime::player.Create(player_config);
         ADXRuntime::LoadFile(acb_file, awb_file);
 	}
 

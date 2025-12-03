@@ -9,7 +9,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
     static bool is_open_info_window = false;
 	static bool is_open_player_window = false;
     static bool is_open_mixer_window = false;
-
+    static bool is_enabled_binauralizer = false;
+    ImVec2 sub_window_size{ 400.0f, 500.05 };
 	/* 未初期化なら何もしない */
 	if (!ADXRuntime::IsInitilaized()) {
 		return;
@@ -21,6 +22,12 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 	ImGui::Begin("Update", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
 	ImGui::Text("Error : %s", ADXUtils::GetErrorMessage().c_str());
+    ImGui::Checkbox("Binauralizer", &is_enabled_binauralizer);
+    if (is_enabled_binauralizer) {
+        criAtomExAsr_EnableBinauralizer(CRI_TRUE);
+    } else {
+        criAtomExAsr_EnableBinauralizer(CRI_FALSE);
+    }
     if (ImGui::TreeNode("File")) {
         if (ImGui::Button("Open")) {
             is_open_file_window = true;
@@ -30,8 +37,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
             is_open_file_window = false;
         }
         if (is_open_file_window) {
-            ImVec2 window_size{ size.x + 400.0f, size.y };
-            FileWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_file_window);
+            FileWindow(sub_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_file_window);
         }
         ImGui::TreePop();
     }
@@ -44,8 +50,8 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
             is_open_info_window = false;
         }
         if (is_open_info_window) {
-            ImVec2 window_size{ size.x + 200.0f, size.y };
-            ImGuiAdx::InfoWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_info_window);
+            ImVec2 window_size{ sub_window_size.x + 200.0f, sub_window_size.y };
+            ImGuiAdx::InfoWindow(sub_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_info_window);
         }
         ImGui::TreePop();
     }
@@ -58,8 +64,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_voicepool_window = false;
 		}
 		if (is_open_voicepool_window) {
-            auto window_size = ImGuiUtils::AddOffset(size, 100.0f);
-            ImGuiAdx::VoicePoolWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_voicepool_window);
+            ImGuiAdx::VoicePoolWindow(sub_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_voicepool_window);
 		}
 		ImGui::TreePop();
 	}
@@ -72,8 +77,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_player_window = false;
 		}
 		if (is_open_player_window) {
-            ImVec2 window_size{ size.x + 200.0f, size.y };
-            ImGuiAdx::PlayerWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_player_window);
+            ImGuiAdx::PlayerWindow(sub_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_player_window);
 		}
 		ImGui::TreePop();
 	}
@@ -87,7 +91,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
         }
         if (is_open_mixer_window) {
             ImVec2 window_size{ size.x + 200.0f, size.y };
-            ImGuiAdx::MixerWindow(window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_mixer_window);
+            ImGuiAdx::MixerWindow(sub_window_size, ImGuiUtils::AddOffsetX(pos, 500.0f), &is_open_mixer_window);
         }
         ImGui::TreePop();
     }
