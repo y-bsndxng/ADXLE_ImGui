@@ -73,11 +73,19 @@ void ADXRuntime::LoadFile(const char* acf_file, const char* acb_file, const char
 void ADXRuntime::LoadFile(const char* acb_file, const char* awb_file)
 {
     CriAtomExAcbHn acb_hn_ = NULL;
+
+    if (strlen(acb_file) == 0) {
+        return;
+    }
+
+    if (ADXRuntime::acb_hn != NULL) {
+        ADXRuntime::UnloadFile();
+    }
     
-    if (strlen(acb_file) > 0 && strlen(awb_file) > 0) {
+    if (strlen(awb_file) > 0) {
         acb_hn_ = criAtomExAcb_LoadAcbFile(
             NULL, acb_file, NULL, awb_file, NULL, 0);
-    } else if (strlen(acb_file) > 0) {
+    } else {
         acb_hn_ = criAtomExAcb_LoadAcbFile(
             NULL, acb_file, NULL, NULL, NULL, 0);
     }
