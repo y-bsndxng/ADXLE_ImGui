@@ -97,7 +97,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     }
     ImGui::Separator();
     if (ImGui::TreeNode("PCM")) {
-		static float freq = 440.0f;
+		static float freq = 220.0f;
         static Player::DataRequestObj obj;
         static int32_t selected_noise_index;
         std::vector<std::string> noise_names;
@@ -110,7 +110,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
         ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
         obj.noise_type = noise_types.at(selected_noise_index);
-		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
+		ImGui::SliderFloat("input freq", &freq, 0.0f, 1000.0f);
 
 		if (ImGui::Button("Set")) {
             obj.frequency = (int32_t)freq;
@@ -119,6 +119,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             criAtomExPlayer_SetNumChannels(player, obj.num_channels);
 	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
 	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
+            std::fill(obj.buffer[obj.index].begin(), obj.buffer[obj.index].end(), static_cast<int16_t>(0));
             criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
 		}
 		ImGui::SameLine();
