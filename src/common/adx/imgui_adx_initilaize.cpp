@@ -113,8 +113,8 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	}
 
 	if (ImGuiAdx::IsInitilaized()) {
-        VoicePool::Config voicepool_config;
-		Player::Config player_config;
+        VoicePoolWrapper::Config voicepool_config;
+		PlayerWrapper::Config player_config;
 
         voicepool_config.standard_config.num_voices = num_voice;
         voicepool_config.rawpcm_config.num_voices = num_voice;
@@ -132,8 +132,8 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 
 		player_config.num_players = num_players;
 
-        ADXRuntime::vp.CreateVoicePool(voicepool_config);
-		ADXRuntime::player.Create(player_config);
+        ADXRuntime::voicepool_wrapper.CreateVoicePool(voicepool_config);
+		ADXRuntime::player_wrapper.Create(player_config);
         ADXRuntime::LoadFile(acb_file, awb_file);
 	}
 

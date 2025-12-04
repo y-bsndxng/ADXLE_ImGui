@@ -11,22 +11,23 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     static int32_t selected_player_index = 0;
     static bool is_auto_update = false;
     static bool is_loop = false;
+    static float freq = 220.0f;
     auto cue_names = ADXRuntime::GetCueNames();
     std::vector<std::string> player_names;
     CriAtomExPlayerHn player;
-    static Player::DataRequestObj obj;
+    static PlayerWrapper::DataRequestObj obj;
 	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
     static bool is_cue = (!cue_names.empty()) ? true : false;
 
-    player_names.resize(ADXRuntime::player.num_players);
-	for (int32_t i = 0; i < ADXRuntime::player.num_players; i++) {
+    player_names.resize(ADXRuntime::player_wrapper.num_players);
+	for (int32_t i = 0; i < ADXRuntime::player_wrapper.num_players; i++) {
         player_names.at(i) = "PlayerIndex : " + std::to_string(i);
 	}
 	ImGuiUtils::Comboui("Player", &selected_player_index, &player_names);
 
-	player = ADXRuntime::player.GetPlayerHn(selected_player_index);
+	player = ADXRuntime::player_wrapper.GetPlayerHn(selected_player_index);
     
     ImGui::Separator();
 	if (ImGui::BeginTable("Table##player", 2)) {
@@ -64,6 +65,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::SameLine();
     if (ImGui::Button("Stop")) {
         criAtomExPlayer_Stop(player);
+        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
     }
     ImGui::SameLine();
     if (ImGui::Button("Stop without Release Time")) {
@@ -71,7 +73,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     }
     ImGui::SameLine();
     if (ImGui::Button("Update")) {
-        ADXRuntime::player.Update(selected_player_index);
+        ADXRuntime::player_wrapper.Update(selected_player_index);
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset")) {
@@ -92,7 +94,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::SameLine();
     ImGui::Checkbox("Auto Update", &is_auto_update);
     if (is_auto_update != false) {
-        ADXRuntime::player.Update(selected_player_index);
+        ADXRuntime::player_wrapper.Update(selected_player_index);
     }
     ImGui::SameLine();
     ImGui::Checkbox("Loop Play", &is_loop);
@@ -109,7 +111,6 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     }
     ImGui::Separator();
     if (ImGui::TreeNode("PCM")) {
-		static float freq = 220.0f;
         static int32_t selected_noise_index;
         std::vector<std::string> noise_names;
         std::vector<NoiseType> noise_types = {
@@ -117,13 +118,23 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             NoiseType::White,
             NoiseType::Pink
         };
-        is_cue = false;
 
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
         ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
 		ImGui::SliderFloat("input freq", &freq, 0.0f, 1000.0f);
         obj.noise_type = noise_types.at(selected_noise_index);
         obj.frequency = freq;
+        is_cue = false;
+
+        for (auto i = 0; i < obj.enable_channels.size(); i++) {
+            std::string label = "ch : " + std::to_string(i);
+            bool enable_channle = obj.enable_channels.at(i);
+            ImGui::PushID(i);
+            if (ImGui::Checkbox(label.c_str(), &enable_channle)) {
+                obj.enable_channels.at(i) = enable_channle;
+            }
+            ImGui::PopID();
+        }
 
 		ImGui::TreePop();
 	}
@@ -160,7 +171,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         static float pan3d_elevation = 0.0f;
         static float pan3d_distance = 1.0f;
         
-        ADXRuntime::player.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_PAN3D);
+        ADXRuntime::player_wrapper.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_PAN3D);
 
         ImGui::SliderFloat("Pan3d Angle", &pan3d_angle, -180.0f, 180.0f);
         ImGui::SliderFloat("Pan3d Elevation", &pan3d_elevation, -180.0f, 180.0f);
@@ -191,7 +202,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
         std::transform(orientation_list.begin(), orientation_list.end(), std::back_inserter(orientation_names),[](const auto& v) { return v.first; });
 
-        ADXRuntime::player.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_3D_POS);
+        ADXRuntime::player_wrapper.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_3D_POS);
 
         if (!cue_names.empty()) {
             auto [result, info] = ADXRuntime::GetCueInfo(cue_names.at(selected_cue_index).c_str());
@@ -215,9 +226,9 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         ImGui::InputFloat("Max Distance", &max_dist);
 
         if (ImGui::Button("Random Source Position")) {
-            source_pos.x = (float)rand() / RAND_MAX;
-            source_pos.y = (float)rand() / RAND_MAX;
-            source_pos.z = (float)rand() / RAND_MAX;
+            source_pos.x = (float)rand() / RAND_MAX * max_dist;
+            source_pos.y = (float)rand() / RAND_MAX * max_dist;
+            source_pos.z = (float)rand() / RAND_MAX * max_dist;
         }
         if (ImGui::Button("Reset Source Position")) {
             source_pos.x = 0.0f;
@@ -238,9 +249,9 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         
         if (ImGui::Button("Random Listener Position")) {
             auto rand_index = rand() % orientation_names.size();
-            listener_pos.x = (float)rand() / RAND_MAX;
-            listener_pos.y = (float)rand() / RAND_MAX;
-            listener_pos.z = (float)rand() / RAND_MAX;
+            listener_pos.x = (float)rand() / RAND_MAX * max_dist;
+            listener_pos.y = (float)rand() / RAND_MAX * max_dist;
+            listener_pos.z = (float)rand() / RAND_MAX * max_dist;
             selected_orientation_index = static_cast<int32_t>(rand_index);
         }
         if (ImGui::Button("Reset Listener Position")) {
@@ -250,9 +261,9 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             selected_orientation_index = 0;
         }
         
-        ADXRuntime::player.SetSourcePosition(selected_player_index, source_pos);
-        ADXRuntime::player.SetListenerPosition(selected_player_index, listener_pos);
-        ADXRuntime::player.SetListenerOrientation(selected_player_index, listener_front, listener_top);
+        ADXRuntime::player_wrapper.SetSourcePosition(selected_player_index, source_pos);
+        ADXRuntime::player_wrapper.SetListenerPosition(selected_player_index, listener_pos);
+        ADXRuntime::player_wrapper.SetListenerOrientation(selected_player_index, listener_front, listener_top);
         
         ImGui::TreePop();
     }
@@ -341,7 +352,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
 static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayerHn player)
 {
-    Player::DataRequestObj* request_obj = (Player::DataRequestObj*)obj;
+    PlayerWrapper::DataRequestObj* request_obj = (PlayerWrapper::DataRequestObj*)obj;
 	float sin_step = 2.0f * 3.141592f * request_obj->frequency / request_obj->sampling_rate;
     std::vector<std::vector<int16_t>> buffer(request_obj->num_channels, std::vector<int16_t>(request_obj->num_samples, 0));
     float coefficient[7] = { 0 };
@@ -357,6 +368,9 @@ static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayer
     for (auto i = 0; i < request_obj->num_samples; i++) {
         for (auto ch = 0; ch < request_obj->num_channels; ch++) {
             float pcm = 0.0f;
+            if (!request_obj->enable_channels[ch]) {
+                continue;
+            }
             switch (request_obj->noise_type) {
             case NoiseType::Sin:
                 pcm = sinf(request_obj->offset);

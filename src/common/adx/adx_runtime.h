@@ -34,7 +34,7 @@ enum class NoiseType : std::uint8_t {
     Pink
 };
 
-class VoicePool {
+class VoicePoolWrapper {
 public:
     struct Config {
         Config();
@@ -43,9 +43,9 @@ public:
         CriAtomExRawPcmVoicePoolConfig      rawpcm_config;
         CriAtomExWaveVoicePoolConfig        wave_config;
     };
-    VoicePool();
-    ~VoicePool() {};
-    void CreateVoicePool(const VoicePool::Config& config);
+    VoicePoolWrapper();
+    ~VoicePoolWrapper() {};
+    void CreateVoicePool(const VoicePoolWrapper::Config& config);
     void DestroyAllVoicePool(void);
     CriAtomExVoicePoolHn GetVoicePoolHn(const VoiceType voice_type);
 private:
@@ -54,7 +54,7 @@ private:
     CriAtomExVoicePoolHn wave_voicepool_hn;
 };
 
-class Player {
+class PlayerWrapper {
 public:
     struct Config {
         Config();
@@ -75,11 +75,12 @@ public:
         float frequency;
         float offset;
         std::vector<int16_t> buffer[2];
+        std::vector<bool> enable_channels;
     };
-    Player() {};
-    ~Player() {};
+    PlayerWrapper() {};
+    ~PlayerWrapper() {};
     int32_t num_players = 0;
-    void Create(const Player::Config& config);
+    void Create(const PlayerWrapper::Config& config);
     void Destroy(void);
     void Update(const int32_t player_index);
     void SetPanType(const int32_t player_index, const CriAtomExPanType type);
@@ -133,8 +134,8 @@ void ResetPerformanceInfo(void);
 void ResetPerformanceInfo(const CriAtomExAsrRackId rack_id);
 
 /* Runtime Object */
-inline VoicePool vp;
-inline Player player;
+inline VoicePoolWrapper voicepool_wrapper;
+inline PlayerWrapper player_wrapper;
 inline std::vector<CriAtomExPlaybackId> playback_ids;
 inline CriAtomExAcbHn acb_hn;
 inline CriAtomExDbasId dbas_id;

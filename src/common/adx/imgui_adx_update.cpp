@@ -10,7 +10,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 	static bool is_open_player_window = false;
     static bool is_open_mixer_window = false;
     static bool is_enabled_binauralizer = false;
-    ImVec2 sub_window_size{ 400.0f, 500.05 };
+    ImVec2 sub_window_size{ 400.0f, 500.0f };
 	/* 未初期化なら何もしない */
 	if (!ADXRuntime::IsInitilaized()) {
 		return;

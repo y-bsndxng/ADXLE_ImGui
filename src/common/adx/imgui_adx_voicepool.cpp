@@ -21,12 +21,12 @@ void ImGuiAdx::VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_ope
 	ImGuiUtils::Comboui("VoiceType", &selected_index, &names);
 	voice_type = voice_types.at(selected_index);
 
-    if (ADXRuntime::vp.GetVoicePoolHn(voice_type) != NULL) {
+    if (ADXRuntime::voicepool_wrapper.GetVoicePoolHn(voice_type) != NULL) {
         auto [num_used_voices, num_max_voices] = ADXRuntime::GetNumUsedVoicePools(voice_type);
         if (ImGui::BeginTable("Voice Pool Info Table", 2)) {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Ptr");
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%p", ADXRuntime::vp.GetVoicePoolHn(VoiceType::Standard));
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%p", ADXRuntime::voicepool_wrapper.GetVoicePoolHn(VoiceType::Standard));
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0); ImGui::Text("%s", "Used / Max");
             ImGui::TableSetColumnIndex(1); ImGui::Text("%3d / %3d", num_used_voices, num_max_voices);
@@ -38,7 +38,7 @@ void ImGuiAdx::VoicePoolWindow(const ImVec2 size, const ImVec2 pos, bool* is_ope
             ImGui::TableSetupColumn("Ptr", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableHeadersRow();
             for (int32_t i = 0; i < num_max_voices; i++) {
-                auto vp_hn = ADXRuntime::vp.GetVoicePoolHn(voice_type);
+                auto vp_hn = ADXRuntime::voicepool_wrapper.GetVoicePoolHn(voice_type);
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("%5d", i);
