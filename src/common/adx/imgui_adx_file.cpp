@@ -4,12 +4,10 @@
 
 void ImGuiAdx::FileWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
-    constexpr int32_t path_length = 512;
-    static char acf_file[path_length] = "";
-    static char acb_file[path_length] = "";
-    static char awb_file[path_length] = "";
-    static char other_file[path_length] = "";
-    ImVec2 file_dialog_window_size = { 1000, 600 };
+    static char acf_file[PATH_LENGTH] = "";
+    static char acb_file[PATH_LENGTH] = "";
+    static char awb_file[PATH_LENGTH] = "";
+    ImVec2 file_dialog_window_size =  ImGuiUtils::GetDialogWindowSize();
 
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
@@ -56,24 +54,9 @@ void ImGuiAdx::FileWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     if (ImGui::Button("Clear##AWB")) {
         memset(&awb_file, 0, sizeof(awb_file));
     }
-
-    ImGui::InputText("Other File", other_file, IM_ARRAYSIZE(other_file));
-    ImGui::SameLine();
-    if (ImGui::Button("Open##Other")) {
-        IGFD::FileDialogConfig config;
-        config.path = ImGuiUtils::GetCurrentPath();
-        ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseOtherFileDlgKey", "Choose File", ".hca, .adx, .wav", config);
-    }
-    ImGuiUtils::OpenDialog("ChooseOtherFileDlgKey", other_file);
-    ImGui::SameLine();
-    if (ImGui::Button("Clear##Other")) {
-        memset(&other_file, 0, sizeof(other_file));
-    }
     
     if (ImGui::Button("Load")) {
         ADXRuntime::LoadFile(acf_file, acb_file, awb_file);
-        ADXRuntime::LoadFile(other_file);
     }
     
 

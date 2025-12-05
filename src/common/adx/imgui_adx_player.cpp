@@ -19,7 +19,6 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
-    static bool is_cue = (!cue_names.empty()) ? true : false;
 
     player_names.resize(ADXRuntime::player_wrapper.num_players);
 	for (int32_t i = 0; i < ADXRuntime::player_wrapper.num_players; i++) {
@@ -48,18 +47,6 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	}
     ImGui::Separator();
     if (ImGui::Button("Start")) {
-        if (is_cue) {
-            auto cue_name = cue_names.at(selected_cue_index).c_str();
-            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name);
-        } else {
-            obj.index = 0;
-            criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
-            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
-            criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
-            criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
-            std::fill(obj.buffer[obj.index].begin(), obj.buffer[obj.index].end(), static_cast<int16_t>(0));
-            criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
-        }
         ADXRuntime::playback_ids.push_back(criAtomExPlayer_Start(player));
     }
     ImGui::SameLine();
@@ -99,8 +86,31 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::Separator();
     if (ImGui::TreeNode("Cue")) {
         if (!cue_names.empty()) {
+            auto cue_name = cue_names.at(selected_cue_index);
             ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
-            is_cue = true;
+            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name.c_str());
+        }
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("File")) {
+        static char file_path[PATH_LENGTH];
+        ImVec2 file_dialog_window_size =  ImGuiUtils::GetDialogWindowSize();
+        ImGui::InputText("Other File", file_path, IM_ARRAYSIZE(file_path));
+        ImGui::SameLine();
+        if (ImGui::Button("Open##File")) {
+            IGFD::FileDialogConfig config;
+            config.path = ImGuiUtils::GetCurrentPath();
+            ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
+            ImGuiFileDialog::Instance()->OpenDialog("ChooseOtherFileDlgKey", "Choose File", "Audio files{.hca,.adx,.wav}", config);
+        }
+        ImGuiUtils::OpenDialog("ChooseOtherFileDlgKey", file_path);
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##File")) {
+            memset(&file_path, 0, sizeof(file_path));
+        }
+        if (ImGui::Button("Set")) {
+            criAtomExPlayer_SetFile(player, NULL, file_path);
         }
         ImGui::TreePop();
     }
@@ -120,7 +130,6 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 		ImGui::SliderFloat("input freq", &freq, 0.0f, 1000.0f);
         obj.noise_type = noise_types.at(selected_noise_index);
         obj.frequency = freq;
-        is_cue = false;
 
         for (auto i = 0; i < obj.enable_channels.size(); i++) {
             auto label = meter_label.at(i).c_str();
@@ -130,6 +139,16 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
                 obj.enable_channels.at(i) = enable_channle;
             }
             ImGui::PopID();
+        }
+        
+        if (ImGui::Button("Set")) {
+            obj.index = 0;
+            criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
+            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
+            criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
+            criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
+            std::fill(obj.buffer[obj.index].begin(), obj.buffer[obj.index].end(), static_cast<int16_t>(0));
+            criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
         }
 
 		ImGui::TreePop();

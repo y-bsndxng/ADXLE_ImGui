@@ -70,13 +70,6 @@ void ADXRuntime::LoadFile(const char* acf_file, const char* acb_file, const char
     }
 }
 
-void ADXRuntime::LoadFile(const char* other_file)
-{
-    for (auto i = 0; i < ADXRuntime::player_wrapper.num_players; i++) {
-        criAtomExPlayer_SetFile(ADXRuntime::player_wrapper.GetPlayerHn(i), NULL, other_file);
-    }
-}
-
 void ADXRuntime::LoadFile(const char* acb_file, const char* awb_file)
 {
     CriAtomExAcbHn acb_hn_ = NULL;

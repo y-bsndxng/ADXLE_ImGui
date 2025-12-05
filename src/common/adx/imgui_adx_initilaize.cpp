@@ -22,7 +22,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
 	static int32_t num_voice = 64;
 	static int32_t num_virtual_voice = 256;
 	static int32_t num_players = 5;
-	ImVec2 file_dialog_window_size = { 1000, 600 };
+	ImVec2 file_dialog_window_size = ImGuiUtils::GetDialogWindowSize();
 
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
@@ -131,6 +131,7 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
         voicepool_config.standard_config.player_config.streaming_flag = CRI_TRUE;
 
 		player_config.num_players = num_players;
+        player_config.player_config.max_path = PATH_LENGTH;
 
         ADXRuntime::voicepool_wrapper.CreateVoicePool(voicepool_config);
 		ADXRuntime::player_wrapper.Create(player_config);

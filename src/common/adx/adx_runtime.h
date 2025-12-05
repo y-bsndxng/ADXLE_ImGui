@@ -113,7 +113,6 @@ bool IsInitilaized(void);
 void Finalize(void);
 void LoadFile(const char* acf_file, const char* acb_file, const char* awb_file);
 void LoadFile(const char* acb_file, const char* awb_file);
-void LoadFile(const char* other_file);
 void UnloadFile(void);
 std::tuple<bool, CriAtomExAcfInfo> GetAcfInfo(void);
 std::tuple<bool, CriAtomExAcbInfo> GetAcbInfo(void);
