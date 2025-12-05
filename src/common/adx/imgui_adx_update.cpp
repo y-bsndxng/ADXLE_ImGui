@@ -81,7 +81,7 @@ void ImGuiAdx::Update(const ImVec2 size, const ImVec2 pos)
 			is_open_player_window = false;
 		}
 		if (is_open_player_window) {
-            sub_window_pos = ImGuiUtils::AddOffsetX(sub_window_pos, 50.0f);
+            sub_window_pos = ImGuiUtils::AddOffsetX(sub_window_pos, 70.0f);
             ImGuiAdx::PlayerWindow(sub_window_size, sub_window_pos, &is_open_player_window);
 		}
 		ImGui::TreePop();

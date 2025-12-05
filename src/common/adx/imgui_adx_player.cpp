@@ -70,7 +70,6 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     if (ImGui::Button("Stop without Release Time")) {
         criAtomExPlayer_StopWithoutReleaseTime(player);
     }
-    ImGui::SameLine();
     if (ImGui::Button("Update")) {
         ADXRuntime::player_wrapper.Update(selected_player_index);
     }
@@ -79,25 +78,22 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         criAtomExPlayer_ResetParameters(player);
         criAtomExPlayer_UpdateAll(player);
     }
+    ImGui::SameLine();
     if (ImGui::Button("Pause")) {
-        criAtomExPlayer_Pause(player, CRI_TRUE);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Prepare")) {
-        criAtomExPlayer_Prepare(player);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Resume")) {
-        criAtomExPlayer_Resume(player, CRIATOMEX_RESUME_PREPARED_PLAYBACK);
+        if (criAtomExPlayer_IsPaused(player) == CRI_FALSE) {
+            criAtomExPlayer_Pause(player, CRI_TRUE);
+        } else {
+            criAtomExPlayer_Pause(player, CRI_FALSE);
+        }
     }
     ImGui::SameLine();
     ImGui::Checkbox("Auto Update", &is_auto_update);
-    if (is_auto_update != false) {
+    if (is_auto_update) {
         ADXRuntime::player_wrapper.Update(selected_player_index);
     }
     ImGui::SameLine();
-    ImGui::Checkbox("Loop Play", &is_loop);
-    if (is_loop != false) {
+    ImGui::Checkbox("Loop", &is_loop);
+    if (is_loop) {
         criAtomExPlayer_LimitLoopCount(player, CRIATOMEXPLAYER_FORCE_LOOP);
     }
     ImGui::Separator();
