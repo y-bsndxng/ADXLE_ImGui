@@ -65,7 +65,6 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::SameLine();
     if (ImGui::Button("Stop")) {
         criAtomExPlayer_Stop(player);
-        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
     }
     ImGui::SameLine();
     if (ImGui::Button("Stop without Release Time")) {
@@ -118,6 +117,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             NoiseType::White,
             NoiseType::Pink
         };
+        auto meter_label = ADXUtils::GetSpeakerMappingLabel(criAtomExAsrRack_GetSpeakerMapping(CRIATOMEXASR_RACK_DEFAULT_ID));
 
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
         ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
@@ -127,10 +127,10 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         is_cue = false;
 
         for (auto i = 0; i < obj.enable_channels.size(); i++) {
-            std::string label = "ch : " + std::to_string(i);
+            auto label = meter_label.at(i).c_str();
             bool enable_channle = obj.enable_channels.at(i);
             ImGui::PushID(i);
-            if (ImGui::Checkbox(label.c_str(), &enable_channle)) {
+            if (ImGui::Checkbox(label, &enable_channle)) {
                 obj.enable_channels.at(i) = enable_channle;
             }
             ImGui::PopID();
@@ -180,6 +180,12 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         criAtomExPlayer_SetPan3dElevation(player, pan3d_elevation);
         criAtomExPlayer_SetPan3dInteriorDistance(player, pan3d_distance);
 
+        if (ImGui::Button("Reset##pan3d")) {
+            pan3d_angle = 0.0f;
+            pan3d_elevation = 0.0f;
+            pan3d_distance = 1.0f;
+        }
+
         ImGui::TreePop();
     }
     ImGui::Separator();
@@ -225,12 +231,13 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         ImGui::InputFloat("Min Distance", &min_dist);
         ImGui::InputFloat("Max Distance", &max_dist);
 
-        if (ImGui::Button("Random Source Position")) {
+        if (ImGui::Button("Random##source")) {
             source_pos.x = (float)rand() / RAND_MAX * max_dist;
             source_pos.y = (float)rand() / RAND_MAX * max_dist;
             source_pos.z = (float)rand() / RAND_MAX * max_dist;
         }
-        if (ImGui::Button("Reset Source Position")) {
+        ImGui::SameLine();
+        if (ImGui::Button("Reset##source")) {
             source_pos.x = 0.0f;
             source_pos.y = 0.0f;
             source_pos.z = 1.0f;
@@ -247,14 +254,15 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         listener_front = orientation_list[orientation_names.at(selected_orientation_index)].first;
         listener_top = orientation_list[orientation_names.at(selected_orientation_index)].second;
         
-        if (ImGui::Button("Random Listener Position")) {
+        if (ImGui::Button("Random##listener")) {
             auto rand_index = rand() % orientation_names.size();
             listener_pos.x = (float)rand() / RAND_MAX * max_dist;
             listener_pos.y = (float)rand() / RAND_MAX * max_dist;
             listener_pos.z = (float)rand() / RAND_MAX * max_dist;
             selected_orientation_index = static_cast<int32_t>(rand_index);
         }
-        if (ImGui::Button("Reset Listener Position")) {
+        ImGui::SameLine();
+        if (ImGui::Button("Reset##listener")) {
             listener_pos.x = 0.0f;
             listener_pos.y = 0.0f;
             listener_pos.z = 0.0f;
@@ -264,6 +272,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         ADXRuntime::player_wrapper.SetSourcePosition(selected_player_index, source_pos);
         ADXRuntime::player_wrapper.SetListenerPosition(selected_player_index, listener_pos);
         ADXRuntime::player_wrapper.SetListenerOrientation(selected_player_index, listener_front, listener_top);
+        ADXRuntime::player_wrapper.SetMinMaxDistance(selected_player_index, min_dist, max_dist);
         
         ImGui::TreePop();
     }

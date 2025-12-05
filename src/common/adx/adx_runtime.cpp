@@ -467,6 +467,12 @@ void PlayerWrapper::SetListenerOrientation(const int32_t player_index, const Cri
     criAtomEx3dListener_SetOrientation(listener, &front, &top);
 }
 
+void PlayerWrapper::SetMinMaxDistance(const int32_t player_index, const float min_distance, const float max_distance)
+{
+    auto source = this->sources.at(player_index);
+    criAtomEx3dSource_SetMinMaxDistance(source, min_distance, max_distance);
+}
+
 CriAtomExPlayerHn PlayerWrapper::GetPlayerHn(const int32_t player_index)
 {
     auto player = this->players.at(player_index);

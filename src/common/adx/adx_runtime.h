@@ -87,6 +87,7 @@ public:
     void SetSourcePosition(const int32_t player_index, const CriAtomExVector position);
     void SetListenerPosition(const int32_t player_index, const CriAtomExVector position);
     void SetListenerOrientation(const int32_t player_index, const CriAtomExVector front, const CriAtomExVector top);
+    void SetMinMaxDistance(const int32_t player_index, const float min_distance, const float max_distance);
     CriAtomExPlayerHn GetPlayerHn(const int32_t player_index);
 private:
     std::vector<CriAtomExPlayerHn> players;

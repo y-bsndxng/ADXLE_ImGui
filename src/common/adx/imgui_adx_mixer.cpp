@@ -183,7 +183,7 @@ static void BusMeter(void)
         font_scale = ImClamp(1.0f - 0.05f * (max_channels - 1), 0.4f, 1.0f);
 
         for (auto ch = 0; ch < max_channels; ch++) {
-            const char* label = meter_label[ch].c_str();
+            const char* label = meter_label.at(ch).c_str();
             /* 各バーの矩形領域*/
             ImVec2 bar_size{ histogram_width / max_channels, histogram_height };
             ImVec2 p0(base.x + ch * (bar_size.x + 6.0f), base.y);
@@ -273,7 +273,7 @@ static void MasterOutMeter(void)
     font_scale = ImClamp(1.0f - 0.05f * (level_info.num_channels - 1), 0.4f, 1.0f);
 
     for (auto ch = 0; ch < level_info.num_channels; ch++) {
-        const char* label = meter_label[ch].c_str();
+        const char* label = meter_label.at(ch).c_str();
         /* 各バーの矩形領域*/
         ImVec2 bar_size{ histogram_width / level_info.num_channels, histogram_height };
         ImVec2 p0(base.x + ch * (bar_size.x + 6.0f), base.y);
