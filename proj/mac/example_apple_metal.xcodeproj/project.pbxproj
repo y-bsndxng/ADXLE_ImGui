@@ -25,6 +25,16 @@
 		139970692EC9AF2A00B35EC9 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 139970682EC9AF2A00B35EC9 /* CoreAudio.framework */; };
 		13BE9DFA2ED877BA00727B74 /* imgui_utils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13BE9DF92ED877BA00727B74 /* imgui_utils.mm */; };
 		13BE9DFB2ED877BA00727B74 /* imgui_utils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13BE9DF92ED877BA00727B74 /* imgui_utils.mm */; };
+		13CDBD322EDFBAA800DE3682 /* imgui_adx_mixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD2F2EDFBAA800DE3682 /* imgui_adx_mixer.cpp */; };
+		13CDBD332EDFBAA800DE3682 /* imgui_adx_file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD2D2EDFBAA800DE3682 /* imgui_adx_file.cpp */; };
+		13CDBD342EDFBAA800DE3682 /* imgui_adx_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD2E2EDFBAA800DE3682 /* imgui_adx_info.cpp */; };
+		13CDBD352EDFBAA800DE3682 /* imgui_adx_player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD302EDFBAA800DE3682 /* imgui_adx_player.cpp */; };
+		13CDBD362EDFBAA800DE3682 /* imgui_adx_voicepool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD312EDFBAA800DE3682 /* imgui_adx_voicepool.cpp */; };
+		13CDBD372EDFBAA800DE3682 /* imgui_adx_mixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD2F2EDFBAA800DE3682 /* imgui_adx_mixer.cpp */; };
+		13CDBD382EDFBAA800DE3682 /* imgui_adx_file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD2D2EDFBAA800DE3682 /* imgui_adx_file.cpp */; };
+		13CDBD392EDFBAA800DE3682 /* imgui_adx_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD2E2EDFBAA800DE3682 /* imgui_adx_info.cpp */; };
+		13CDBD3A2EDFBAA800DE3682 /* imgui_adx_player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD302EDFBAA800DE3682 /* imgui_adx_player.cpp */; };
+		13CDBD3B2EDFBAA800DE3682 /* imgui_adx_voicepool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13CDBD312EDFBAA800DE3682 /* imgui_adx_voicepool.cpp */; };
 		13E328352EC0C54D00B703A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13E328342EC0C54D00B703A0 /* imgui.cpp */; };
 		13E328362EC0C54D00B703A0 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13E328342EC0C54D00B703A0 /* imgui.cpp */; };
 		13E3283B2EC0C5A000B703A0 /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13E328392EC0C5A000B703A0 /* imgui_tables.cpp */; };
@@ -67,6 +77,14 @@
 		139970652EC9AF0800B35EC9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		139970682EC9AF2A00B35EC9 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		13BE9DF92ED877BA00727B74 /* imgui_utils.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = imgui_utils.mm; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/src/common/imgui_utils/imgui_utils.mm; sourceTree = "<absolute>"; };
+		13CDBD2A2EDFBAA800DE3682 /* adx_runtime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = adx_runtime.h; sourceTree = "<group>"; };
+		13CDBD2B2EDFBAA800DE3682 /* adx_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = adx_utils.h; sourceTree = "<group>"; };
+		13CDBD2C2EDFBAA800DE3682 /* imgui_adx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_adx.h; sourceTree = "<group>"; };
+		13CDBD2D2EDFBAA800DE3682 /* imgui_adx_file.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_adx_file.cpp; sourceTree = "<group>"; };
+		13CDBD2E2EDFBAA800DE3682 /* imgui_adx_info.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_adx_info.cpp; sourceTree = "<group>"; };
+		13CDBD2F2EDFBAA800DE3682 /* imgui_adx_mixer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_adx_mixer.cpp; sourceTree = "<group>"; };
+		13CDBD302EDFBAA800DE3682 /* imgui_adx_player.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_adx_player.cpp; sourceTree = "<group>"; };
+		13CDBD312EDFBAA800DE3682 /* imgui_adx_voicepool.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_adx_voicepool.cpp; sourceTree = "<group>"; };
 		13E328332EC0C54D00B703A0 /* imgui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui.h; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui/imgui.h; sourceTree = "<absolute>"; };
 		13E328342EC0C54D00B703A0 /* imgui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui.cpp; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui/imgui.cpp; sourceTree = "<absolute>"; };
 		13E328372EC0C55C00B703A0 /* imconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imconfig.h; path = /Users/yasuyoshida/GitHub/ADXLE_ImGui/external/imgui/imconfig.h; sourceTree = "<absolute>"; };
@@ -146,11 +164,19 @@
 		139970502EC9A78A00B35EC9 /* adx */ = {
 			isa = PBXGroup;
 			children = (
+				13CDBD2D2EDFBAA800DE3682 /* imgui_adx_file.cpp */,
+				13CDBD2E2EDFBAA800DE3682 /* imgui_adx_info.cpp */,
+				13CDBD2F2EDFBAA800DE3682 /* imgui_adx_mixer.cpp */,
+				13CDBD302EDFBAA800DE3682 /* imgui_adx_player.cpp */,
+				13CDBD312EDFBAA800DE3682 /* imgui_adx_voicepool.cpp */,
 				130BBBB62ECC9D6F00A5475A /* imgui_adx_finalize.cpp */,
 				130BBBB72ECC9D6F00A5475A /* imgui_adx_update.cpp */,
 				139970532EC9A7A200B35EC9 /* imgui_adx_initilaize.cpp */,
+				13CDBD2C2EDFBAA800DE3682 /* imgui_adx.h */,
 				139970512EC9A7A200B35EC9 /* adx_runtime.cpp */,
+				13CDBD2A2EDFBAA800DE3682 /* adx_runtime.h */,
 				139970522EC9A7A200B35EC9 /* adx_utils.cpp */,
+				13CDBD2B2EDFBAA800DE3682 /* adx_utils.h */,
 			);
 			path = adx;
 			sourceTree = "<group>";
@@ -354,6 +380,11 @@
 				13E328352EC0C54D00B703A0 /* imgui.cpp in Sources */,
 				13BE9DFA2ED877BA00727B74 /* imgui_utils.mm in Sources */,
 				13E328492EC0C5E200B703A0 /* imgui_impl_osx.mm in Sources */,
+				13CDBD322EDFBAA800DE3682 /* imgui_adx_mixer.cpp in Sources */,
+				13CDBD332EDFBAA800DE3682 /* imgui_adx_file.cpp in Sources */,
+				13CDBD342EDFBAA800DE3682 /* imgui_adx_info.cpp in Sources */,
+				13CDBD352EDFBAA800DE3682 /* imgui_adx_player.cpp in Sources */,
+				13CDBD362EDFBAA800DE3682 /* imgui_adx_voicepool.cpp in Sources */,
 				13E328472EC0C5D600B703A0 /* imgui_impl_metal.mm in Sources */,
 				13E328412EC0C5B800B703A0 /* imgui_draw.cpp in Sources */,
 				130BBBBA2ECC9D6F00A5475A /* imgui_adx_finalize.cpp in Sources */,
@@ -376,6 +407,11 @@
 				13E328362EC0C54D00B703A0 /* imgui.cpp in Sources */,
 				13BE9DFB2ED877BA00727B74 /* imgui_utils.mm in Sources */,
 				13E3284A2EC0C5E200B703A0 /* imgui_impl_osx.mm in Sources */,
+				13CDBD372EDFBAA800DE3682 /* imgui_adx_mixer.cpp in Sources */,
+				13CDBD382EDFBAA800DE3682 /* imgui_adx_file.cpp in Sources */,
+				13CDBD392EDFBAA800DE3682 /* imgui_adx_info.cpp in Sources */,
+				13CDBD3A2EDFBAA800DE3682 /* imgui_adx_player.cpp in Sources */,
+				13CDBD3B2EDFBAA800DE3682 /* imgui_adx_voicepool.cpp in Sources */,
 				13E328462EC0C5D600B703A0 /* imgui_impl_metal.mm in Sources */,
 				13E328432EC0C5B800B703A0 /* imgui_draw.cpp in Sources */,
 				130BBBB82ECC9D6F00A5475A /* imgui_adx_finalize.cpp in Sources */,

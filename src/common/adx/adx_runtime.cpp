@@ -46,8 +46,8 @@ bool ADXRuntime::IsInitilaized(void)
 void ADXRuntime::Finalize(void)
 {
     criAtomExAsrRack_DetachLevelMeter(CRIATOMEXASR_RACK_DEFAULT_ID);
-    ADXRuntime::vp.DestroyAllVoicePool();
-    ADXRuntime::player.DestroyAllPlayer();
+    ADXRuntime::voicepool_wrapper.DestroyAllVoicePool();
+    ADXRuntime::player_wrapper.Destroy();
     ADXRuntime::playback_ids.clear();
     ADXRuntime::UnloadFile();
     
@@ -236,7 +236,7 @@ std::tuple<int32_t, int32_t> ADXRuntime::GetNumUsedVoicePools(VoiceType voice_ty
 	CriSint32 num_used_voices = 0;
 	CriSint32 num_max_voices = 0;
 
-	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::vp.GetVoicePoolHn(voice_type), &num_used_voices, &num_max_voices);
+	criAtomExVoicePool_GetNumUsedVoices(ADXRuntime::voicepool_wrapper.GetVoicePoolHn(voice_type), &num_used_voices, &num_max_voices);
 
 	return std::make_tuple(num_used_voices, num_max_voices);
 }
@@ -303,28 +303,28 @@ void ADXRuntime::ResetPerformanceInfo(const CriAtomExAsrRackId rack_id)
     criAtomExAsrRack_ResetPerformanceMonitor(rack_id);
 }
 
-VoicePool::Config::Config()
+VoicePoolWrapper::Config::Config()
 {
     criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&this->standard_config);
     criAtomExVoicePool_SetDefaultConfigForRawPcmVoicePool(&this->rawpcm_config);
     criAtomExVoicePool_SetDefaultConfigForWaveVoicePool(&this->wave_config);
 }
 
-VoicePool::VoicePool()
+VoicePoolWrapper::VoicePoolWrapper()
 {
     this->standard_voicepool_hn = NULL;
     this->rawpcm_voicepool_hn = NULL;
     this->wave_voicepool_hn = NULL;
 }
 
-void VoicePool::CreateVoicePool(const VoicePool::Config& config)
+void VoicePoolWrapper::CreateVoicePool(const VoicePoolWrapper::Config& config)
 {
 	this->standard_voicepool_hn = criAtomExVoicePool_AllocateStandardVoicePool(&config.standard_config, NULL, 0);
     this->rawpcm_voicepool_hn = criAtomExVoicePool_AllocateRawPcmVoicePool(&config.rawpcm_config, NULL, 0);
     this->wave_voicepool_hn = criAtomExVoicePool_AllocateWaveVoicePool(&config.wave_config, NULL, 0);
 }
 
-void VoicePool::DestroyAllVoicePool(void)
+void VoicePoolWrapper::DestroyAllVoicePool(void)
 {
     if (this->standard_voicepool_hn != NULL) {
         criAtomEx_FreeVoicePool(this->standard_voicepool_hn);
@@ -337,7 +337,7 @@ void VoicePool::DestroyAllVoicePool(void)
     }
 }
 
-CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(const VoiceType voice_type)
+CriAtomExVoicePoolHn VoicePoolWrapper::GetVoicePoolHn(const VoiceType voice_type)
 {
     CriAtomExVoicePoolHn vp_hn = NULL;
 
@@ -358,15 +358,16 @@ CriAtomExVoicePoolHn VoicePool::GetVoicePoolHn(const VoiceType voice_type)
     return vp_hn;
 }
 
-Player::Config::Config() 
+PlayerWrapper::Config::Config() 
 {
     this->num_players = 0;
     criAtomExPlayer_SetDefaultConfig(&this->player_config);
     criAtomEx3dSource_SetDefaultConfig(&this->source_config);
     criAtomEx3dListener_SetDefaultConfig(&this->listener_config);
+    this->player_config.max_path = MAX_PATH_LENGTH;
 }
 
-Player::DataRequestObj::DataRequestObj()
+PlayerWrapper::DataRequestObj::DataRequestObj()
 {
     this->noise_type = NoiseType::Sin;
     this->index = 0;
@@ -377,9 +378,11 @@ Player::DataRequestObj::DataRequestObj()
     this->offset = 0.0f;
     this->buffer[0].resize(this->num_channels * this->num_samples);
     this->buffer[1].resize(this->num_channels * this->num_samples);
+    this->enable_channels.resize(this->num_channels);
+    this->enable_channels.at(0) = true;
 }
 
-void Player::Player::CreatePlayer(const Player::Config& config)
+void PlayerWrapper::PlayerWrapper::Create(const PlayerWrapper::Config& config)
 {
     this->num_players = config.num_players;
     this->players.resize(this->num_players);
@@ -401,7 +404,7 @@ void Player::Player::CreatePlayer(const Player::Config& config)
     assert((size_t)this->num_players == this->listeners.size());
 }
 
-void Player::Player::DestroyAllPlayer(void)
+void PlayerWrapper::PlayerWrapper::Destroy(void)
 {
     for (const auto& player : this->players) {
         criAtomExPlayer_Set3dSourceHn(player, NULL);
@@ -422,7 +425,56 @@ void Player::Player::DestroyAllPlayer(void)
     this->listeners.clear();
 }
 
-CriAtomExPlayerHn Player::GetPlayerHn(const int32_t& player_index)
+void PlayerWrapper::Update(const int32_t player_index)
+{
+    auto player = PlayerWrapper::GetPlayerHn(player_index);
+    auto source = this->sources.at(player_index);
+    auto listener = this->listeners.at(player_index);
+    criAtomEx3dSource_Update(source);
+    criAtomEx3dListener_Update(listener);
+    criAtomExPlayer_UpdateAll(player);
+}
+
+void PlayerWrapper::SetPanType(const int32_t player_index, const CriAtomExPanType type)
+{
+    auto player = PlayerWrapper::GetPlayerHn(player_index);
+    
+    if (type == CRIATOMEX_PAN_TYPE_3D_POS) {
+        auto source = this->sources.at(player_index);
+        auto listener = this->listeners.at(player_index);
+        criAtomExPlayer_Set3dSourceHn(player, source);
+        criAtomExPlayer_Set3dListenerHn(player, listener);
+    } else {
+        criAtomExPlayer_Set3dSourceHn(player, NULL);
+        criAtomExPlayer_Set3dListenerHn(player, NULL);
+    }
+}
+
+void PlayerWrapper::SetSourcePosition(const int32_t player_index, const CriAtomExVector position)
+{
+    auto source = this->sources.at(player_index);
+    criAtomEx3dSource_SetPosition(source, &position);
+}
+
+void PlayerWrapper::SetListenerPosition(const int32_t player_index, const CriAtomExVector position)
+{
+    auto listener = this->listeners.at(player_index);
+    criAtomEx3dListener_SetPosition(listener, &position);
+}
+
+void PlayerWrapper::SetListenerOrientation(const int32_t player_index, const CriAtomExVector front, const CriAtomExVector top)
+{
+    auto listener = this->listeners.at(player_index);
+    criAtomEx3dListener_SetOrientation(listener, &front, &top);
+}
+
+void PlayerWrapper::SetMinMaxDistance(const int32_t player_index, const float min_distance, const float max_distance)
+{
+    auto source = this->sources.at(player_index);
+    criAtomEx3dSource_SetMinMaxDistance(source, min_distance, max_distance);
+}
+
+CriAtomExPlayerHn PlayerWrapper::GetPlayerHn(const int32_t player_index)
 {
     auto player = this->players.at(player_index);
 

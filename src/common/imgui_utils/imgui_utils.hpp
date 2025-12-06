@@ -8,13 +8,14 @@
 #include <ImGuiFileDialog.h>
 
 namespace ImGuiUtils {
-	inline bool Comboui(const std::string& caption, int32_t* current_item_index, const std::vector<std::string>* items);
-	inline void Rightalign(const char* text);
-	inline void OpenDialog(const char* dialog_name, char* select_file_name);
-	inline ImVec2 AddOffsetX(const ImVec2& v, float offset);
-	inline ImVec2 AddOffsetY(const ImVec2& v, float offset);
-	inline ImVec2 AddOffset(const ImVec2& v, float offset);
-    std::string GetCurrentPath();
+inline bool Comboui(const std::string& caption, int32_t* current_item_index, const std::vector<std::string>* items);
+inline void Rightalign(const char* text);
+inline void OpenDialog(const char* dialog_name, char* select_file_name);
+inline ImVec2 GetDialogWindowSize();
+inline ImVec2 AddOffsetX(const ImVec2& v, float offset);
+inline ImVec2 AddOffsetY(const ImVec2& v, float offset);
+inline ImVec2 AddOffset(const ImVec2& v, float offset);
+std::string GetCurrentPath();
 }
 
 inline bool ImGuiUtils::Comboui(const std::string& caption, int32_t* current_item_index, const std::vector<std::string>* items)
@@ -62,6 +63,11 @@ inline void ImGuiUtils::OpenDialog(const char* dialog_name, char* select_file_na
 		/* キャンセル時は何もせず終了 */
 		ImGuiFileDialog::Instance()->Close();
 	}
+}
+
+inline ImVec2 ImGuiUtils::GetDialogWindowSize()
+{
+    return ImVec2{ 1000.0f, 600.0f };
 }
 
 inline ImVec2 ImGuiUtils::AddOffsetX(const ImVec2& v, float offset)

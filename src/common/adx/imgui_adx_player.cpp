@@ -11,20 +11,23 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     static int32_t selected_player_index = 0;
     static bool is_auto_update = false;
     static bool is_loop = false;
+    static float freq = 220.0f;
     auto cue_names = ADXRuntime::GetCueNames();
     std::vector<std::string> player_names;
     CriAtomExPlayerHn player;
+    static PlayerWrapper::DataRequestObj obj;
+    static std::string cue_name = (cue_names.empty()) ? "" : cue_names.at(selected_cue_index);
 	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
 
-    player_names.resize(ADXRuntime::player.num_players);
-	for (int32_t i = 0; i < ADXRuntime::player.num_players; i++) {
+    player_names.resize(ADXRuntime::player_wrapper.num_players);
+	for (int32_t i = 0; i < ADXRuntime::player_wrapper.num_players; i++) {
         player_names.at(i) = "PlayerIndex : " + std::to_string(i);
 	}
 	ImGuiUtils::Comboui("Player", &selected_player_index, &player_names);
 
-	player = ADXRuntime::player.GetPlayerHn(selected_player_index);
+	player = ADXRuntime::player_wrapper.GetPlayerHn(selected_player_index);
     
     ImGui::Separator();
 	if (ImGui::BeginTable("Table##player", 2)) {
@@ -45,6 +48,9 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	}
     ImGui::Separator();
     if (ImGui::Button("Start")) {
+        if (!cue_name.empty()) {
+            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name.c_str());
+        }
         ADXRuntime::playback_ids.push_back(criAtomExPlayer_Start(player));
     }
     ImGui::SameLine();
@@ -55,50 +61,79 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     if (ImGui::Button("Stop without Release Time")) {
         criAtomExPlayer_StopWithoutReleaseTime(player);
     }
-    ImGui::SameLine();
     if (ImGui::Button("Update")) {
-        criAtomExPlayer_UpdateAll(player);
+        ADXRuntime::player_wrapper.Update(selected_player_index);
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset")) {
         criAtomExPlayer_ResetParameters(player);
         criAtomExPlayer_UpdateAll(player);
     }
+    ImGui::SameLine();
     if (ImGui::Button("Pause")) {
-        criAtomExPlayer_Pause(player, CRI_TRUE);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Prepare")) {
-        criAtomExPlayer_Prepare(player);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Resume")) {
-        criAtomExPlayer_Resume(player, CRIATOMEX_RESUME_PREPARED_PLAYBACK);
+        if (criAtomExPlayer_IsPaused(player) == CRI_FALSE) {
+            criAtomExPlayer_Pause(player, CRI_TRUE);
+        } else {
+            criAtomExPlayer_Pause(player, CRI_FALSE);
+        }
     }
     ImGui::SameLine();
     ImGui::Checkbox("Auto Update", &is_auto_update);
-    if (is_auto_update != false) {
-        criAtomExPlayer_UpdateAll(player);
+    if (is_auto_update) {
+        ADXRuntime::player_wrapper.Update(selected_player_index);
     }
     ImGui::SameLine();
-    ImGui::Checkbox("Loop Play", &is_loop);
-    if (is_loop != false) {
+    ImGui::Checkbox("Loop", &is_loop);
+    if (is_loop) {
         criAtomExPlayer_LimitLoopCount(player, CRIATOMEXPLAYER_FORCE_LOOP);
     }
     ImGui::Separator();
     if (ImGui::TreeNode("Cue")) {
         if (!cue_names.empty()) {
-            const char* cue_name;
-            ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
-            cue_name = cue_names.at(selected_cue_index).c_str();
-            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name);
+            if (ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names)) {
+                cue_name = cue_names.at(selected_cue_index);
+            }
         }
         ImGui::TreePop();
     }
     ImGui::Separator();
+    if (ImGui::TreeNode("File")) {
+        static char file_path[MAX_PATH_LENGTH] = "";
+        ImVec2 file_dialog_window_size =  ImGuiUtils::GetDialogWindowSize();
+        ImGui::InputText("Other File", file_path, IM_ARRAYSIZE(file_path));
+        if (ImGui::Button("Open##File")) {
+            IGFD::FileDialogConfig config;
+            config.path = ImGuiUtils::GetCurrentPath();
+            ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
+            ImGuiFileDialog::Instance()->OpenDialog("ChooseOtherFileDlgKey", "Choose File", "Audio files{.adx,.hca,.wav,.aiff}", config);
+        }
+        ImGuiUtils::OpenDialog("ChooseOtherFileDlgKey", file_path);
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##File")) {
+            memset(&file_path, 0, sizeof(file_path));
+        }
+        if (!std::string(file_path).empty()) {
+            /* 拡張子取得 ( ".wav" )  */
+            std::string ext = std::filesystem::path(file_path).extension().string();
+            /* 拡張子の全てを小文字に変換 */
+            std::transform(ext.begin(), ext.end(), ext.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            criAtomExPlayer_SetFile(player, NULL, file_path);
+            if (ext == ".adx") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_ADX);
+            } else if (ext == ".hca") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_HCA);
+            } else if (ext == ".wav") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_WAVE);
+            } else if (ext == ".aiff") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_AIFF);
+            }
+        }
+        cue_name = "";
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
     if (ImGui::TreeNode("PCM")) {
-		static float freq = 440.0f;
-        static Player::DataRequestObj obj;
         static int32_t selected_noise_index;
         std::vector<std::string> noise_names;
         std::vector<NoiseType> noise_types = {
@@ -106,27 +141,30 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             NoiseType::White,
             NoiseType::Pink
         };
+        auto meter_label = ADXUtils::GetSpeakerMappingLabel(criAtomExAsrRack_GetSpeakerMapping(CRIATOMEXASR_RACK_DEFAULT_ID));
+        cue_name = "";
 
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
         ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
+		ImGui::SliderFloat("input freq", &freq, 0.0f, 1000.0f);
         obj.noise_type = noise_types.at(selected_noise_index);
-		ImGui::SliderFloat("input freq", &freq, 0.0f, 10000.0f);
+        obj.frequency = freq;
 
-		if (ImGui::Button("Set")) {
-            obj.frequency = (int32_t)freq;
-            obj.index = 0;
-	        criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
-            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
-	        criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
-	        criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
+        for (auto i = 0; i < obj.enable_channels.size(); i++) {
+            auto label = meter_label.at(i).c_str();
+            bool enable_channle = obj.enable_channels.at(i);
+            ImGui::PushID(i);
+            if (ImGui::Checkbox(label, &enable_channle)) {
+                obj.enable_channels.at(i) = enable_channle;
+            }
+            ImGui::PopID();
+        }
+        
+        if (criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_STOP) {
+            criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
+            criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
             criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Unet")) {
-            criAtomExPlayer_Stop(player);
-	        criAtomExPlayer_SetDataRequestCallback(player, NULL, NULL);
-		}
-
+        }
 		ImGui::TreePop();
 	}
     ImGui::Separator();
@@ -161,8 +199,8 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         static float pan3d_angle = 0.0f;
         static float pan3d_elevation = 0.0f;
         static float pan3d_distance = 1.0f;
-
-        criAtomExPlayer_SetPanType(player, CRIATOMEX_PAN_TYPE_PAN3D);
+        
+        ADXRuntime::player_wrapper.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_PAN3D);
 
         ImGui::SliderFloat("Pan3d Angle", &pan3d_angle, -180.0f, 180.0f);
         ImGui::SliderFloat("Pan3d Elevation", &pan3d_elevation, -180.0f, 180.0f);
@@ -171,6 +209,100 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
         criAtomExPlayer_SetPan3dElevation(player, pan3d_elevation);
         criAtomExPlayer_SetPan3dInteriorDistance(player, pan3d_distance);
 
+        if (ImGui::Button("Reset##pan3d")) {
+            pan3d_angle = 0.0f;
+            pan3d_elevation = 0.0f;
+            pan3d_distance = 1.0f;
+        }
+
+        ImGui::TreePop();
+    }
+    ImGui::Separator();
+    if (ImGui::TreeNode("3D Pos")) {
+        static int32_t selected_orientation_index = 0;
+        std::unordered_map<std::string, std::pair<CriAtomExVector, CriAtomExVector>> orientation_list = {
+            {"Forward", {{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Backward", {{0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Left", {{-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Right", {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}},
+            {"Up", {{0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}}},
+            {"Down", {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}},
+        };
+        std::vector<std::string> orientation_names;
+        static CriAtomExVector source_pos { 0.0f, 0.0f, 1.0f };
+        static CriAtomExVector listener_pos { 0.0f, 0.0f, 1.0f };
+        static CriAtomExVector listener_front { 0.0f, 0.0f, 1.0f };
+        static CriAtomExVector listener_top { 0.0f, 0.0f, 1.0f };
+        static float min_dist = 0.0f, max_dist = 10.0f;
+
+        std::transform(orientation_list.begin(), orientation_list.end(), std::back_inserter(orientation_names),[](const auto& v) { return v.first; });
+
+        ADXRuntime::player_wrapper.SetPanType(selected_player_index, CRIATOMEX_PAN_TYPE_3D_POS);
+
+        if (!cue_names.empty()) {
+            auto [result, info] = ADXRuntime::GetCueInfo(cue_names.at(selected_cue_index).c_str());
+            switch (info.pan_type) {
+                case CRIATOMEX_PAN_TYPE_3D_POS:
+                    min_dist = info.pos3d_info.min_distance;
+                    max_dist = info.pos3d_info.max_distance;
+                    break;
+                default:
+                    min_dist = 1.0f;
+                    max_dist = 10.0f;
+                    break;
+            }
+        }
+
+        ImGui::SeparatorText("Source");
+        ImGui::SliderFloat("source x", &source_pos.x, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("source y", &source_pos.y, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("source z", &source_pos.z, -1.0f * max_dist, max_dist);
+        ImGui::InputFloat("Min Distance", &min_dist);
+        ImGui::InputFloat("Max Distance", &max_dist);
+
+        if (ImGui::Button("Random##source")) {
+            source_pos.x = (float)rand() / RAND_MAX * max_dist;
+            source_pos.y = (float)rand() / RAND_MAX * max_dist;
+            source_pos.z = (float)rand() / RAND_MAX * max_dist;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Reset##source")) {
+            source_pos.x = 0.0f;
+            source_pos.y = 0.0f;
+            source_pos.z = 1.0f;
+        }
+        
+        ImGui::SeparatorText("Listener");
+        ImGui::Text("Position");
+        ImGui::SliderFloat("listener x", &listener_pos.x, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("listener y", &listener_pos.y, -1.0f * max_dist, max_dist);
+        ImGui::SliderFloat("listener z", &listener_pos.z, -1.0f * max_dist, max_dist);
+        
+        ImGui::Text("Orientation");
+        ImGuiUtils::Comboui("Orientation", &selected_orientation_index, &orientation_names);
+        listener_front = orientation_list[orientation_names.at(selected_orientation_index)].first;
+        listener_top = orientation_list[orientation_names.at(selected_orientation_index)].second;
+        
+        if (ImGui::Button("Random##listener")) {
+            auto rand_index = rand() % orientation_names.size();
+            listener_pos.x = (float)rand() / RAND_MAX * max_dist;
+            listener_pos.y = (float)rand() / RAND_MAX * max_dist;
+            listener_pos.z = (float)rand() / RAND_MAX * max_dist;
+            selected_orientation_index = static_cast<int32_t>(rand_index);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Reset##listener")) {
+            listener_pos.x = 0.0f;
+            listener_pos.y = 0.0f;
+            listener_pos.z = 0.0f;
+            selected_orientation_index = 0;
+        }
+        
+        ADXRuntime::player_wrapper.SetSourcePosition(selected_player_index, source_pos);
+        ADXRuntime::player_wrapper.SetListenerPosition(selected_player_index, listener_pos);
+        ADXRuntime::player_wrapper.SetListenerOrientation(selected_player_index, listener_front, listener_top);
+        ADXRuntime::player_wrapper.SetMinMaxDistance(selected_player_index, min_dist, max_dist);
+        
         ImGui::TreePop();
     }
     ImGui::Separator();
@@ -194,6 +326,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             ImGui::TreePop();
         }
     }
+    ImGui::Separator();
     if (ImGui::TreeNode("Playback")) {
         if (ImGui::BeginTable("PlaybackTable", 4, flags)) {
             ImGui::TableSetupColumn("Playback ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
@@ -257,7 +390,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 
 static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayerHn player)
 {
-    Player::DataRequestObj* request_obj = (Player::DataRequestObj*)obj;
+    PlayerWrapper::DataRequestObj* request_obj = (PlayerWrapper::DataRequestObj*)obj;
 	float sin_step = 2.0f * 3.141592f * request_obj->frequency / request_obj->sampling_rate;
     std::vector<std::vector<int16_t>> buffer(request_obj->num_channels, std::vector<int16_t>(request_obj->num_samples, 0));
     float coefficient[7] = { 0 };
@@ -273,6 +406,9 @@ static void DataRequestCallback(void* obj, CriAtomExPlaybackId id, CriAtomPlayer
     for (auto i = 0; i < request_obj->num_samples; i++) {
         for (auto ch = 0; ch < request_obj->num_channels; ch++) {
             float pcm = 0.0f;
+            if (!request_obj->enable_channels[ch]) {
+                continue;
+            }
             switch (request_obj->noise_type) {
             case NoiseType::Sin:
                 pcm = sinf(request_obj->offset);

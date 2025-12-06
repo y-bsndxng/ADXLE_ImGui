@@ -22,6 +22,8 @@
 #include <cri_le_atom_macosx.h>
 #endif
 
+#define MAX_PATH_LENGTH (1024)
+
 enum class VoiceType : std::uint8_t {
     Standard,
     RawPcm,
@@ -34,7 +36,7 @@ enum class NoiseType : std::uint8_t {
     Pink
 };
 
-class VoicePool {
+class VoicePoolWrapper {
 public:
     struct Config {
         Config();
@@ -43,9 +45,9 @@ public:
         CriAtomExRawPcmVoicePoolConfig      rawpcm_config;
         CriAtomExWaveVoicePoolConfig        wave_config;
     };
-    VoicePool();
-    ~VoicePool() {};
-    void CreateVoicePool(const VoicePool::Config& config);
+    VoicePoolWrapper();
+    ~VoicePoolWrapper() {};
+    void CreateVoicePool(const VoicePoolWrapper::Config& config);
     void DestroyAllVoicePool(void);
     CriAtomExVoicePoolHn GetVoicePoolHn(const VoiceType voice_type);
 private:
@@ -54,7 +56,7 @@ private:
     CriAtomExVoicePoolHn wave_voicepool_hn;
 };
 
-class Player {
+class PlayerWrapper {
 public:
     struct Config {
         Config();
@@ -72,16 +74,23 @@ public:
         int32_t num_channels;
         int32_t num_samples;
         int32_t sampling_rate;
-        int32_t frequency;
+        float frequency;
         float offset;
         std::vector<int16_t> buffer[2];
+        std::vector<bool> enable_channels;
     };
-    Player() {};
-    ~Player() {};
+    PlayerWrapper() {};
+    ~PlayerWrapper() {};
     int32_t num_players = 0;
-    void CreatePlayer(const Player::Config& config);
-    void DestroyAllPlayer(void);
-    CriAtomExPlayerHn GetPlayerHn(const int32_t& player_index);
+    void Create(const PlayerWrapper::Config& config);
+    void Destroy(void);
+    void Update(const int32_t player_index);
+    void SetPanType(const int32_t player_index, const CriAtomExPanType type);
+    void SetSourcePosition(const int32_t player_index, const CriAtomExVector position);
+    void SetListenerPosition(const int32_t player_index, const CriAtomExVector position);
+    void SetListenerOrientation(const int32_t player_index, const CriAtomExVector front, const CriAtomExVector top);
+    void SetMinMaxDistance(const int32_t player_index, const float min_distance, const float max_distance);
+    CriAtomExPlayerHn GetPlayerHn(const int32_t player_index);
 private:
     std::vector<CriAtomExPlayerHn> players;
     std::vector<CriAtomEx3dSourceHn> sources;
@@ -128,8 +137,8 @@ void ResetPerformanceInfo(void);
 void ResetPerformanceInfo(const CriAtomExAsrRackId rack_id);
 
 /* Runtime Object */
-inline VoicePool vp;
-inline Player player;
+inline VoicePoolWrapper voicepool_wrapper;
+inline PlayerWrapper player_wrapper;
 inline std::vector<CriAtomExPlaybackId> playback_ids;
 inline CriAtomExAcbHn acb_hn;
 inline CriAtomExDbasId dbas_id;

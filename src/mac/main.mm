@@ -148,7 +148,7 @@
         ImVec2 pos{ 100, 100 };
         ImGuiAdx::Initilaize(size, pos);
     } else {
-        ImVec2 size{ 200, 500 };
+        ImVec2 size{ 1000, 500 };
         ImVec2 pos{ 100, 100 };
         ImGuiAdx::Update(size, pos);
     }
