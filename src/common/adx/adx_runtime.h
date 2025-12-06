@@ -22,6 +22,8 @@
 #include <cri_le_atom_macosx.h>
 #endif
 
+#define MAX_PATH_LENGTH (1024)
+
 enum class VoiceType : std::uint8_t {
     Standard,
     RawPcm,

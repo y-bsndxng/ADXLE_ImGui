@@ -16,6 +16,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     std::vector<std::string> player_names;
     CriAtomExPlayerHn player;
     static PlayerWrapper::DataRequestObj obj;
+    static std::string cue_name = (cue_names.empty()) ? "" : cue_names.at(selected_cue_index);
 	ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Player", is_open, ImGuiWindowFlags_NoSavedSettings);
@@ -47,6 +48,9 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 	}
     ImGui::Separator();
     if (ImGui::Button("Start")) {
+        if (!cue_name.empty()) {
+            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name.c_str());
+        }
         ADXRuntime::playback_ids.push_back(criAtomExPlayer_Start(player));
     }
     ImGui::SameLine();
@@ -86,32 +90,46 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
     ImGui::Separator();
     if (ImGui::TreeNode("Cue")) {
         if (!cue_names.empty()) {
-            auto cue_name = cue_names.at(selected_cue_index);
-            ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names);
-            criAtomExPlayer_SetCueName(player, ADXRuntime::acb_hn, cue_name.c_str());
+            if (ImGuiUtils::Comboui("Cue", &selected_cue_index, &cue_names)) {
+                cue_name = cue_names.at(selected_cue_index);
+            }
         }
         ImGui::TreePop();
     }
     ImGui::Separator();
     if (ImGui::TreeNode("File")) {
-        static char file_path[PATH_LENGTH];
+        static char file_path[MAX_PATH_LENGTH] = "";
         ImVec2 file_dialog_window_size =  ImGuiUtils::GetDialogWindowSize();
         ImGui::InputText("Other File", file_path, IM_ARRAYSIZE(file_path));
-        ImGui::SameLine();
         if (ImGui::Button("Open##File")) {
             IGFD::FileDialogConfig config;
             config.path = ImGuiUtils::GetCurrentPath();
             ImGui::SetNextWindowSize(file_dialog_window_size, ImGuiCond_Always);
-            ImGuiFileDialog::Instance()->OpenDialog("ChooseOtherFileDlgKey", "Choose File", "Audio files{.hca,.adx,.wav}", config);
+            ImGuiFileDialog::Instance()->OpenDialog("ChooseOtherFileDlgKey", "Choose File", "Audio files{.adx,.hca,.wav,.aiff}", config);
         }
         ImGuiUtils::OpenDialog("ChooseOtherFileDlgKey", file_path);
         ImGui::SameLine();
         if (ImGui::Button("Clear##File")) {
             memset(&file_path, 0, sizeof(file_path));
         }
-        if (ImGui::Button("Set")) {
+        if (!std::string(file_path).empty()) {
+            /* 拡張子取得 ( ".wav" )  */
+            std::string ext = std::filesystem::path(file_path).extension().string();
+            /* 拡張子の全てを小文字に変換 */
+            std::transform(ext.begin(), ext.end(), ext.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
             criAtomExPlayer_SetFile(player, NULL, file_path);
+            if (ext == ".adx") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_ADX);
+            } else if (ext == ".hca") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_HCA);
+            } else if (ext == ".wav") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_WAVE);
+            } else if (ext == ".aiff") {
+                criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_AIFF);
+            }
         }
+        cue_name = "";
         ImGui::TreePop();
     }
     ImGui::Separator();
@@ -124,6 +142,7 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             NoiseType::Pink
         };
         auto meter_label = ADXUtils::GetSpeakerMappingLabel(criAtomExAsrRack_GetSpeakerMapping(CRIATOMEXASR_RACK_DEFAULT_ID));
+        cue_name = "";
 
         std::transform(noise_types.begin(), noise_types.end(), std::back_inserter(noise_names), [](const NoiseType v) { return ADXUtils::GetNoiseTypeString(v); });
         ImGuiUtils::Comboui("NoiseType", &selected_noise_index, &noise_names);
@@ -141,16 +160,11 @@ void ImGuiAdx::PlayerWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
             ImGui::PopID();
         }
         
-        if (ImGui::Button("Set")) {
-            obj.index = 0;
+        if (criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_STOP) {
             criAtomExPlayer_SetFormat(player, CRIATOMEX_FORMAT_RAW_PCM);
-            criAtomExPlayer_SetNumChannels(player, obj.num_channels);
-            criAtomExPlayer_SetSamplingRate(player, obj.sampling_rate);
             criAtomExPlayer_SetDataRequestCallback(player, DataRequestCallback, &obj);
-            std::fill(obj.buffer[obj.index].begin(), obj.buffer[obj.index].end(), static_cast<int16_t>(0));
             criAtomExPlayer_SetData(player, obj.buffer[obj.index].data(), obj.num_samples * obj.num_channels * sizeof(int16_t));
         }
-
 		ImGui::TreePop();
 	}
     ImGui::Separator();

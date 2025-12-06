@@ -129,10 +129,10 @@ void ImGuiAdx::Initilaize(const ImVec2 size, const ImVec2 pos)
         voicepool_config.wave_config.player_config.max_channels = criAtomExAsrRack_GetOutputChannels(CRIATOMEXASR_RACK_DEFAULT_ID);
 
         voicepool_config.standard_config.player_config.streaming_flag = CRI_TRUE;
+        voicepool_config.wave_config.player_config.streaming_flag = CRI_TRUE;
 
 		player_config.num_players = num_players;
-        player_config.player_config.max_path = PATH_LENGTH;
-
+        
         ADXRuntime::voicepool_wrapper.CreateVoicePool(voicepool_config);
 		ADXRuntime::player_wrapper.Create(player_config);
         ADXRuntime::LoadFile(acb_file, awb_file);

@@ -7,7 +7,6 @@
 #include <adx_runtime.h>
 
 #define UNUSED(arg) if(arg == arg) {}
-#define PATH_LENGTH (512)
 
 namespace ADXUtils {
 void UserErrorCallBackFunc(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray);

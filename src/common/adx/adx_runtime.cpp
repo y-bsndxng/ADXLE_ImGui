@@ -364,6 +364,7 @@ PlayerWrapper::Config::Config()
     criAtomExPlayer_SetDefaultConfig(&this->player_config);
     criAtomEx3dSource_SetDefaultConfig(&this->source_config);
     criAtomEx3dListener_SetDefaultConfig(&this->listener_config);
+    this->player_config.max_path = MAX_PATH_LENGTH;
 }
 
 PlayerWrapper::DataRequestObj::DataRequestObj()
