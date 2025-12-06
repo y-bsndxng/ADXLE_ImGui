@@ -53,7 +53,7 @@ Dear ImGui ベースのシンプルなウィンドウからファイルダイア
 
   * [Dear ImGui](https://github.com/ocornut/imgui)
   * [ImGuiFileDialog](https://github.com/aiekick/ImGuiFileDialog)
-  * ADXLE SDK（CRIWARE）※別途入手が必要
+  * [CRI ADX LE](https://game.criware.jp/products/adx-le/) ※別途入手が必要
 
 ---
 
