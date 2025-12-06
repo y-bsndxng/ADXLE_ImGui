@@ -75,7 +75,7 @@ git submodule update --init --recursive
 * `external` ディレクトリに Dear ImGui および ImGuiFileDialog が取得されます。
 
 ### 3. ADXLE SDK の配置
-
+* Native 向け SDK を [CRI ADX LE](https://game.criware.jp/products/adx-le/)より入手してください。
 * 入手した ADXLE SDK を `cri` ディレクトリ配下に配置します。
 * ヘッダファイルやライブラリファイルの具体的な配置場所は、ご自身の環境・プロジェクト設定に合わせてください。
 * 各プロジェクトファイル（`proj` 以下）で、この `cri` ディレクトリをインクルードパス / ライブラリパスとして参照するように設定してください。
