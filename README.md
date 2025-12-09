@@ -43,17 +43,19 @@ Dear ImGui ベースのシンプルなウィンドウからファイルダイア
 
 * C++17 以上をサポートするコンパイラ
 * 対応 OS（想定）
-
   * Windows 10 以降
   * macOS 以降
 * グラフィックス
-
   * Dear ImGui が動作する環境（例：OpenGL + GLFW など）
 * 外部ライブラリ / SDK
-
   * [Dear ImGui](https://github.com/ocornut/imgui)
   * [ImGuiFileDialog](https://github.com/aiekick/ImGuiFileDialog)
-  * [CRI ADX LE](https://game.criware.jp/products/adx-le/) ※別途入手が必要
+  * [CRI ADX LE](https://game.criware.jp/products/adx-le/) 
+
+> ⚠️ **注意**
+>
+> * CRI ADX LE は別途入手、配置が必要です。
+> * CRI ADX LE Ver. 2.29.01 以降の SDK で開発、動作確認を行っています。
 
 ---
 
