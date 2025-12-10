@@ -4,9 +4,9 @@
 
 void ImGuiAdx::FileWindow(const ImVec2 size, const ImVec2 pos, bool* is_open)
 {
-    static char acf_file[PATH_LENGTH] = "";
-    static char acb_file[PATH_LENGTH] = "";
-    static char awb_file[PATH_LENGTH] = "";
+    static char acf_file[MAX_PATH_LENGTH] = "";
+    static char acb_file[MAX_PATH_LENGTH] = "";
+    static char awb_file[MAX_PATH_LENGTH] = "";
     ImVec2 file_dialog_window_size =  ImGuiUtils::GetDialogWindowSize();
 
     ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
